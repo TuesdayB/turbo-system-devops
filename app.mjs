@@ -6,9 +6,6 @@ const app = express()
 
 app.get('/', (req, res) => {
   res.send('Hello Express: DEV')
-})
-
-app.get('/', (req, res) => {
   res.send('did it work?????????')
 })
 
