@@ -120,7 +120,7 @@ app.get('/api/health', (req, res) => {
     {
       method: 'DELETE',
       path: '/api/quilts/:id',
-      description: 'DELETE - Remove attendance record'
+      description: 'DELETE - Remove quilt record'
     }
   ];
 
@@ -139,6 +139,7 @@ app.get('/api/class', (req, res) => {
     courseName: 'Projects in IS',
     nickname: 'Full Stack DevOps',
     semester: 'Spring 2026',
+    programmerName: 'Tuesday Brown'
   };
   res.json(classInfo);
 });
