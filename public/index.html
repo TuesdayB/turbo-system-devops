@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CIS 486 - Attendance Tracker</title>
+  <title>Quilt Machine - CIS 486</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -23,8 +23,8 @@
       color: #333;
     }
     .class-info {
-      background: #e8f4fd;
-      border-left: 4px solid #2196F3;
+      background: #f8deff;
+      border-left: 4px solid #cf65ea;
     }
     .form-group {
       margin-bottom: 15px;
@@ -42,7 +42,7 @@
       font-size: 16px;
     }
     button {
-      background: #2196F3;
+      background: #cf65ea;
       color: white;
       padding: 10px 20px;
       border: none;
@@ -52,7 +52,7 @@
       margin-right: 10px;
     }
     button:hover {
-      background: #1976D2;
+      background: #be4adb;
     }
     .delete-btn {
       background: #f44336;
@@ -88,7 +88,7 @@
       border-radius: 4px;
       border: 1px solid #dee2e6;
     }
-    #attendanceList {
+    #quiltList {
       max-height: 400px;
       overflow-y: auto;
     }
@@ -101,36 +101,41 @@
     <div id="classInfo">Loading class information...</div>
   </div>
 
-  <!-- Attendance Form -->
+  <!-- Quilt Form -->
   <div class="container">
-    <h2>Student Attendance</h2>
+    <h2>Make a Quilt</h2>
     <div id="message"></div>
     
-    <form id="attendanceForm">
+    <form id="quiltForm">
       <div class="form-group">
-        <label for="studentName">Student Name:</label>
-        <input type="text" id="studentName" required>
+        <label for="quiltName">Quilt Name:</label>
+        <input type="text" id="quiltName" required>
       </div>
       
       <div class="form-group">
-        <label for="date">Today's Date:</label>
-        <input type="text" id="date" required placeholder="February 3, 2026">
+        <label for="quiltWidth">Quilt Width (in squares):</label>
+        <input type="number" id="quiltWidth" required min="2" max=>
       </div>
       
       <div class="form-group">
-        <label for="keyword">Keyword from Board:</label>
-        <input type="text" id="keyword" required>
+        <label for="quiltHeight">Quilt Height (in squares):</label>
+        <input type="number" id="quiltHeight" required min="2" max="10">
       </div>
       
-      <button type="submit">Record Attendance</button>
-      <button type="button" onclick="loadAttendance()">Refresh List</button>
+      <div class="form-group">
+        <label for="squareSize">Square Size (in inches):</label>
+        <input type="number" id="squareSize" required min="5" max="10">
+      </div>
+      
+      <button type="submit">Save Quilt</button>
+      <button type="button" onclick="loadQuilts()">Refresh List</button>
     </form>
   </div>
 
-  <!-- Attendance Records -->
+  <!-- Quilt Records -->
   <div class="container">
-    <h2>Attendance Records</h2>
-    <div id="attendanceList">Loading attendance records...</div>
+    <h2>Quilts</h2>
+    <div id="quiltList">Loading quilt records...</div>
   </div>
 
   <script>
@@ -146,7 +151,6 @@
           <h3>${classData.courseNumber} - ${classData.courseName}</h3>
           <p><strong>Nickname:</strong> ${classData.nickname}</p>
           <p><strong>Semester:</strong> ${classData.semester}</p>
-          <p><strong>Calendar:</strong> ${classData.calendar}</p>
         `;
       } catch (error) {
         document.getElementById('classInfo').innerHTML = 'Error loading class information';
@@ -154,15 +158,16 @@
     }
 
     // Handle form submission
-    document.getElementById('attendanceForm').addEventListener('submit', async (e) => {
+    document.getElementById('quiltForm').addEventListener('submit', async (e) => {
       e.preventDefault();
       
-      const studentName = document.getElementById('studentName').value;
-      const date = document.getElementById('date').value;
-      const keyword = document.getElementById('keyword').value;
+      const quiltName = document.getElementById('quiltName').value;
+      const quiltWidth = document.getElementById('quiltWidth').value;
+      const quiltHeight = document.getElementById('quiltHeight').value;
+      const squareSize = document.getElementById('squareSize').value;
 
       try {
-        const url = editingId ? `/api/attendance/${editingId}` : '/api/attendance';
+        const url = editingId ? `/api/quilts/${editingId}` : '/api/quilts';
         const method = editingId ? 'PUT' : 'POST';
         
         const response = await fetch(url, {
@@ -171,9 +176,10 @@
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            studentName,
-            date,
-            keyword
+            quiltName,
+            quiltWidth,
+            quiltHeight,
+            squareSize
           })
         });
 
@@ -181,12 +187,12 @@
         
         if (response.ok) {
           showMessage(result.message, 'success');
-          document.getElementById('attendanceForm').reset();
+          document.getElementById('quiltForm').reset();
           if (editingId) {
             editingId = null;
-            document.querySelector('button[type="submit"]').textContent = 'Record Attendance';
+            document.querySelector('button[type="submit"]').textContent = 'Save Quilt';
           }
-          loadAttendance();
+          loadQuilts();
         } else {
           showMessage(result.error, 'error');
         }
@@ -195,39 +201,40 @@
       }
     });
 
-    // Load attendance records
-    async function loadAttendance() {
+    // Load quilt records
+    async function loadQuilts() {
       try {
-        const response = await fetch('/api/attendance');
+        const response = await fetch('/api/quilts');
         const records = await response.json();
         
-        const listDiv = document.getElementById('attendanceList');
+        const listDiv = document.getElementById('quiltList');
         
         if (records.length === 0) {
-          listDiv.innerHTML = '<p>No attendance records yet.</p>';
+          listDiv.innerHTML = '<p>No quilt records yet.</p>';
           return;
         }
 
         listDiv.innerHTML = records.map(record => `
           <div class="record">
-            <strong>${record.studentName}</strong> - ${record.date}<br>
-            <small>Keyword: ${record.keyword} | Recorded: ${new Date(record.timestamp).toLocaleString()}</small><br>
-            <button class="edit-btn" onclick="editRecord('${record._id}', '${record.studentName}', '${record.date}', '${record.keyword}')">Edit</button>
+            <strong>${record.quiltName}</strong><br>
+            <small>Dimensions: ${record.quiltWidth} x ${record.quiltHeight} | Recorded: ${new Date(record.timestamp).toLocaleString()}</small><br>
+            <button class="edit-btn" onclick="editRecord('${record._id}', '${record.quiltName}', '${record.quiltWidth}', '${record.quiltHeight}','${record.squareSize}')">Edit</button>
             <button class="delete-btn" onclick="deleteRecord('${record._id}')">Delete</button>
           </div>
         `).join('');
       } catch (error) {
-        document.getElementById('attendanceList').innerHTML = 'Error loading attendance records';
+        document.getElementById('quiltList').innerHTML = 'Error loading quilt records';
       }
     }
 
     // Edit record
-    function editRecord(id, studentName, date, keyword) {
+    function editRecord(id, quiltName, quiltWidth, quiltHeight, squareSize) {
       editingId = id;
-      document.getElementById('studentName').value = studentName;
-      document.getElementById('date').value = date;
-      document.getElementById('keyword').value = keyword;
-      document.querySelector('button[type="submit"]').textContent = 'Update Attendance';
+      document.getElementById('quiltName').value = quiltName;
+      document.getElementById('quiltWidth').value = quiltWidth;
+      document.getElementById('quiltHeight').value = quiltHeight;
+      document.getElementById('squareSize').value = squareSize;
+      document.querySelector('button[type="submit"]').textContent = 'Update Quilt';
       showMessage('Editing record - click Update to save changes', 'success');
     }
 
@@ -236,7 +243,7 @@
       if (!confirm('Are you sure you want to delete this record?')) return;
       
       try {
-        const response = await fetch(`/api/attendance/${id}`, {
+        const response = await fetch(`/api/quilts/${id}`, {
           method: 'DELETE'
         });
 
@@ -244,7 +251,7 @@
         
         if (response.ok) {
           showMessage(result.message, 'success');
-          loadAttendance();
+          loadQuilts();
         } else {
           showMessage(result.error, 'error');
         }
@@ -264,10 +271,10 @@
 
     // Initialize page
     loadClassInfo();
-    loadAttendance();
+    loadQuilts();
 
     // Set today's date as default
-    document.getElementById('date').value = 'February 3, 2026';
+    document.getElementById('date').value = 'February 30, 2026';
   </script>
 </body>
 </html>
