@@ -15,7 +15,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const uri = process.env.MONGO_URI;
 const myVar = 'injected from server'; // Declare your variable
-
+const desmosKey = process.env.DESMOS_KEY;
 
 app.use(express.static(join(__dirname, 'public')));
 app.use(express.json());
@@ -44,7 +44,6 @@ async function connectToMongo() {
   }
 }
 connectToMongo();
-
 
 // middlewares aka endpoints aka 'get to slash' {http verb} to slash {you name ur endpoint}
 app.get('/', (req, res) => {
@@ -86,11 +85,6 @@ app.get('/api/health', (req, res) => {
       description: 'Show all available API endpoints'
     },
     {
-      method: 'GET',
-      path: '/api/class',
-      description: 'Get class information (course details)'
-    },
-    {
       method: 'POST',
       path: '/api/quilts',
       description: 'CREATE - Add new quilt record',
@@ -130,18 +124,6 @@ app.get('/api/health', (req, res) => {
     timestamp: new Date().toISOString(),
     endpoints: endpoints
   });
-});
-
-// Class Information API
-app.get('/api/class', (req, res) => {
-  const classInfo = {
-    courseNumber: 'CIS 486',
-    courseName: 'Projects in IS',
-    nickname: 'Full Stack DevOps',
-    semester: 'Spring 2026',
-    programmerName: 'Tuesday Brown'
-  };
-  res.json(classInfo);
 });
 
 // CRUD Operations

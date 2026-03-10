@@ -17,10 +17,10 @@
       max-width: 800px;
       margin: 0 auto;
       padding: 20px;
-      background-color: #f5f5f5;
+      background-image: url('https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fwallpapers.com%2Fimages%2Fhd%2Fquilt-lx9zbf8qsbwl7tn4.jpg&f=1&nofb=1&ipt=d2a77d2d6947d96522dc6b92f0b9c7f759dabab9842b5ac49b2a223315bae937');
     }
 
-    .container {
+    .container-lg {
       background: white;
       padding: 20px;
       border-radius: 8px;
@@ -31,11 +31,6 @@
     h1,
     h2 {
       color: #333;
-    }
-
-    .class-info {
-      background: #f8deff;
-      border-left: 4px solid #cf65ea;
     }
 
     .form-group {
@@ -72,11 +67,11 @@
     }
 
     .delete-btn {
-      background: #f44336;
+      background: #f4364f;
     }
 
     .delete-btn:hover {
-      background: #d32f2f;
+      background: #d32f4a;
     }
 
     .edit-btn {
@@ -117,18 +112,34 @@
       max-height: 400px;
       overflow-y: auto;
     }
+
+    .bg-purple {
+      background: #be4adb;
+    }
+
+    .footer a {
+      color: #f2bfff;
+      text-decoration: none;
+      font-size: 0.8rem;
+    }
+
+    .footer a:hover {
+      color: #9d43b4;
+    }
+
+    .footer span {
+      color: #ffffff;
+      font-size: 0.8rem;
+    }
   </style>
 </head>
 
 <body>
-  <!-- Class Information Section -->
-  <div class="container class-info">
-    <h1>Class Information</h1>
-    <div id="classInfo">Loading class information...</div>
-  </div>
-
+  <!-- I need to figure out how to make a more intuitive way to input arrays of coordinate points for the quilt geometry. 
+   Each small array would be a polygon. 
+   I have the API key, I just need to make sure it isn't visible to the public. Or at least I'm pretty sure it shouldn't be visible to the public.-->
   <!-- Quilt Form -->
-  <div class="container">
+  <div class="container-lg">
     <h2>Make a Quilt</h2>
     <div id="message"></div>
 
@@ -140,7 +151,7 @@
 
       <div class="form-group">
         <label for="quiltWidth">Quilt Width (in squares):</label>
-        <input type="number" id="quiltWidth" required min="2" max=>
+        <input type="number" id="quiltWidth" required min="2" max="10">
       </div>
 
       <div class="form-group">
@@ -156,33 +167,38 @@
       <button type="submit">Save Quilt</button>
       <button type="button" onclick="loadQuilts()">Refresh List</button>
     </form>
+    <br>
+    <p>Support for pattern planning coming soon!</p>
   </div>
+<!-- Pattern Planner  -->
+ <!-- I need to figure out how to make a more intuitive way to input arrays of coordinate points for the quilt geometry. 
+   Each small array would be a polygon. 
+   Unsure whether the API key should be publicly visible or not, but the Desmos site doesn't seem concerned about that in its instructions.-->
+ <div class="container-lg">
+<p><strong>Work in Progress!</strong></p>
+  <div id="calculator" style="width: 600px; height: 400px;"></div>
+ </div>
 
   <!-- Quilt Records -->
-  <div class="container">
+  <div class="container-lg">
     <h2>Quilts</h2>
     <div id="quiltList">Loading quilt records...</div>
   </div>
 
+  <!-- footer -->
+  <!-- source: Blog-Admin index.html footer pattern -->
+  <footer>
+    <div class="footer d-flex bg-purple justify-content-center align-items-center gap-3">
+      <span>Tuesday Brown</span>
+      <a target="_blank" href="https://github.com/TuesdayB/turbo-system-devops">GitHub</a>
+      <a target="_blank"
+        href="https://validator.w3.org/nu/?doc=https%3A%2F%2Fquiltmachine.barrycumbie.com%2F">Validator</a>
+      <a target="_blank" href="https://turbo-system-devops.onrender.com/">Render</a>
+    </div>
+  </footer>
+
   <script>
     let editingId = null;
-
-    // Load class information on page load
-    async function loadClassInfo() {
-      try {
-        const response = await fetch('/api/class');
-        const classData = await response.json();
-
-        document.getElementById('classInfo').innerHTML = `
-          <h3>${classData.courseNumber} - ${classData.courseName}</h3>
-          <p><strong>Nickname:</strong> ${classData.nickname}</p>
-          <p><strong>Semester:</strong> ${classData.semester}</p>
-          <p><strong>Student Name:</strong> ${classData.programmerName}</p>
-        `;
-      } catch (error) {
-        document.getElementById('classInfo').innerHTML = 'Error loading class information';
-      }
-    }
 
     // Handle form submission
     document.getElementById('quiltForm').addEventListener('submit', async (e) => {
@@ -297,15 +313,25 @@
     }
 
     // Initialize page
-    loadClassInfo();
+    loadDesmosInfo();
     loadQuilts();
 
     // Set today's date as default
     document.getElementById('date').value = 'February 30, 2026';
   </script>
+
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
     integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
     crossorigin="anonymous"></script>
+
+  <script src="scripts/script.js"></script>
+
+  <script src="https://www.desmos.com/api/v1.11/calculator.js?apiKey=4f3e04fd4c374ddb80aaa9a9cb33b8fd"></script>
+  
+  <script>
+  var elt = document.getElementById('calculator');
+  var calculator = Desmos.GraphingCalculator(elt);
+  </script>
 </body>
 
 </html>
