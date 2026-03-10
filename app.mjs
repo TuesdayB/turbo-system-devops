@@ -1,6 +1,6 @@
 //app.mjs
 //we are in ES6, use this. 
-import 'dotenv/config'; 
+import 'dotenv/config';
 import express from 'express';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
@@ -13,12 +13,12 @@ import { MongoClient, ServerApiVersion, ObjectId } from 'mongodb';
 const app = express();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
-const uri = process.env.MONGO_URI;  
+const uri = process.env.MONGO_URI;
 const myVar = 'injected from server'; // Declare your variable
-
+const desmosKey = process.env.DESMOS_KEY;
 
 app.use(express.static(join(__dirname, 'public')));
-app.use(express.json()); 
+app.use(express.json());
 
 
 
@@ -45,12 +45,11 @@ async function connectToMongo() {
 }
 connectToMongo();
 
-
 // middlewares aka endpoints aka 'get to slash' {http verb} to slash {you name ur endpoint}
 app.get('/', (req, res) => {
   // res.send('Hello Express'); //string response
   // res.sendFile('index.html'); // <- this don't work w/o imports, assign, and arguements
-  res.sendFile(join(__dirname, 'public', 'index.html')) ;
+  res.sendFile(join(__dirname, 'public', 'index.html'));
 
 })
 
@@ -86,39 +85,36 @@ app.get('/api/health', (req, res) => {
       description: 'Show all available API endpoints'
     },
     {
-      method: 'GET',
-      path: '/api/class',
-      description: 'Get class information (course details)'
-    },
-    {
       method: 'POST',
-      path: '/api/attendance',
-      description: 'CREATE - Add new student attendance record',
+      path: '/api/quilts',
+      description: 'CREATE - Add new quilt record',
       bodyExample: {
-        studentName: 'John Doe',
-        date: 'February 3, 2026',
-        keyword: 'devops'
+        "quiltName": "testquilt",
+        "quiltWidth": 5,
+        "quiltHeight": 6,
+        "squareSize": 10
       }
     },
     {
       method: 'GET',
-      path: '/api/attendance',
-      description: 'READ - Get all attendance records'
+      path: '/api/quilts',
+      description: 'READ - Get all quilt records'
     },
     {
       method: 'PUT',
-      path: '/api/attendance/:id',
-      description: 'UPDATE - Update existing attendance record',
+      path: '/api/quilts/:id',
+      description: 'UPDATE - Update existing quilt record',
       bodyExample: {
-        studentName: 'Jane Doe',
-        date: 'February 3, 2026',
-        keyword: 'mongodb'
+        "quiltName": "testquilt",
+        "quiltWidth": 6,
+        "quiltHeight": 5,
+        "squareSize": 8
       }
     },
     {
       method: 'DELETE',
-      path: '/api/attendance/:id',
-      description: 'DELETE - Remove attendance record'
+      path: '/api/quilts/:id',
+      description: 'DELETE - Remove quilt record'
     }
   ];
 
@@ -130,104 +126,93 @@ app.get('/api/health', (req, res) => {
   });
 });
 
-// Class Information API
-app.get('/api/class', (req, res) => {
-  const classInfo = {
-    courseNumber: 'CIS 486',
-    courseName: 'Projects in IS',
-    nickname: 'Full Stack DevOps',
-    semester: 'Spring 2026',
-    calendar: 'Class calendar coming soon!'
-  };
-  res.json(classInfo);
-});
+// CRUD Operations
 
-// CRUD Operations for Attendance
-
-// CREATE - Add student attendance
-app.post('/api/attendance', async (req, res) => {
+// CREATE - Add quilt
+app.post('/api/quilts', async (req, res) => {
   try {
-    const { studentName, date, keyword } = req.body;
-    
-    if (!studentName || !date || !keyword) {
+    const { quiltName, quiltWidth, quiltHeight, squareSize } = req.body;
+
+    if (!quiltName || !quiltWidth || !quiltHeight || !squareSize) {
       return res.status(400).json({ error: 'Missing required fields' });
     }
 
-    const db = client.db('cis486');
-    const collection = db.collection('attendance');
-    
-    const attendanceRecord = {
-      studentName,
-      date,
-      keyword,
+    const db = client.db('quiltmachine');
+    const collection = db.collection('quilts');
+
+    const quiltRecord = {
+      quiltName,
+      quiltWidth,
+      quiltHeight,
+      squareSize,
       timestamp: new Date()
     };
-    
-    const result = await collection.insertOne(attendanceRecord);
-    res.json({ message: 'Attendance recorded!', id: result.insertedId });
+
+    const result = await collection.insertOne(quiltRecord);
+    res.json({ message: 'Quilt Saved!', id: result.insertedId });
   } catch (error) {
-    console.error('Error creating attendance:', error);
-    res.status(500).json({ error: 'Failed to record attendance' });
+    console.error('Error creating quilt:', error);
+    res.status(500).json({ error: 'Failed to save quilt' });
   }
 });
 
-// READ - Get all attendance records
-app.get('/api/attendance', async (req, res) => {
+// READ - Get all saved quilts
+app.get('/api/quilts', async (req, res) => {
   try {
-    const db = client.db('cis486');
-    const collection = db.collection('attendance');
-    
+    const db = client.db('quiltmachine');
+    const collection = db.collection('quilts');
+
     const records = await collection.find({}).toArray();
     res.json(records);
   } catch (error) {
-    console.error('Error reading attendance:', error);
-    res.status(500).json({ error: 'Failed to get attendance records' });
+    console.error('Error reading quilt list:', error);
+    res.status(500).json({ error: 'Failed to get quilts' });
   }
 });
 
-// UPDATE - Update attendance record
-app.put('/api/attendance/:id', async (req, res) => {
+// UPDATE - Update record
+app.put('/api/quilts/:id', async (req, res) => {
   try {
     const { id } = req.params;
-    const { studentName, date, keyword } = req.body;
-    
-    const db = client.db('cis486');
-    const collection = db.collection('attendance');
-    
+    const { quiltName, quiltWidth, quiltHeight, squareSize } = req.body;
+
+    const db = client.db('quiltmachine');
+    const collection = db.collection('quilts');
+    console.log(id);
     const result = await collection.updateOne(
       { _id: new ObjectId(id) },
-      { $set: { studentName, date, keyword, updatedAt: new Date() } }
+      { $set: { quiltName, quiltWidth, quiltHeight, squareSize } }
     );
-    
+
     if (result.matchedCount === 0) {
       return res.status(404).json({ error: 'Record not found' });
     }
-    
-    res.json({ message: 'Attendance updated!' });
+
+    res.json({ message: 'Quilts updated!' });
   } catch (error) {
-    console.error('Error updating attendance:', error);
-    res.status(500).json({ error: 'Failed to update attendance' });
+    console.error('Error updating quilts:', error);
+    res.status(500).json({ error: 'Failed to update quilt' });
   }
 });
 
-// DELETE - Delete attendance record
-app.delete('/api/attendance/:id', async (req, res) => {
+// DELETE - Delete quilt record
+app.delete('/api/quilts/:id', async (req, res) => {
   try {
     const { id } = req.params;
-    
-    const db = client.db('cis486');
-    const collection = db.collection('attendance');
-    
+
+    const db = client.db('quiltmachine');
+    const collection = db.collection('quilts');
+
     const result = await collection.deleteOne({ _id: new ObjectId(id) });
-    
+
     if (result.deletedCount === 0) {
       return res.status(404).json({ error: 'Record not found' });
     }
-    
-    res.json({ message: 'Attendance deleted!' });
+
+    res.json({ message: 'Quilt deleted!' });
   } catch (error) {
-    console.error('Error deleting attendance:', error);
-    res.status(500).json({ error: 'Failed to delete attendance' });
+    console.error('Error deleting quilt:', error);
+    res.status(500).json({ error: 'Failed to delete quilt' });
   }
 });
 
