@@ -11,6 +11,8 @@ The target audience should align with the comic's target audience, which would b
 - [Repository](https://github.com/TuesdayB/turbo-system-devops)
 - [Render](https://turbo-system-devops.onrender.com/)
 - [Deployment](https://quiltmachine.barrycumbie.com)
+- [Milestones](https://github.com/TuesdayB/turbo-system-devops/milestones)
+- [Selected Boxes/Pathways](https://github.com/TuesdayB/turbo-system-devops/issues/5)
 ### Tech Stack
 - node.js
 - express.js
