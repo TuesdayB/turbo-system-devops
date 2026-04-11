@@ -7,197 +7,67 @@
   <title>Quilt Machine - CIS 486</title>
 
   <link rel="stylesheet" href="path/to/normalize.css">
-
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
     integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
-
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      max-width: 800px;
-      margin: 0 auto;
-      padding: 20px;
-      background-image: url('https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fwallpapers.com%2Fimages%2Fhd%2Fquilt-lx9zbf8qsbwl7tn4.jpg&f=1&nofb=1&ipt=d2a77d2d6947d96522dc6b92f0b9c7f759dabab9842b5ac49b2a223315bae937');
-    }
-
-    .container-lg {
-      background: white;
-      padding: 20px;
-      border-radius: 8px;
-      margin-bottom: 20px;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    }
-
-    h1,
-    h2 {
-      color: #333;
-    }
-
-    .form-group {
-      margin-bottom: 15px;
-    }
-
-    label {
-      display: block;
-      margin-bottom: 5px;
-      font-weight: bold;
-    }
-
-    input {
-      width: 100%;
-      padding: 8px;
-      border: 1px solid #ddd;
-      border-radius: 4px;
-      font-size: 16px;
-    }
-
-    button {
-      background: #cf65ea;
-      color: white;
-      padding: 10px 20px;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-      font-size: 16px;
-      margin-right: 10px;
-    }
-
-    button:hover {
-      background: #be4adb;
-    }
-
-    .delete-btn {
-      background: #f4364f;
-    }
-
-    .delete-btn:hover {
-      background: #d32f4a;
-    }
-
-    .edit-btn {
-      background: #ff9800;
-    }
-
-    .edit-btn:hover {
-      background: #f57c00;
-    }
-
-    .message {
-      padding: 10px;
-      margin: 10px 0;
-      border-radius: 4px;
-    }
-
-    .success {
-      background: #d4edda;
-      color: #155724;
-      border: 1px solid #c3e6cb;
-    }
-
-    .error {
-      background: #f8d7da;
-      color: #721c24;
-      border: 1px solid #f5c6cb;
-    }
-
-    .record {
-      background: #f8f9fa;
-      padding: 10px;
-      margin: 5px 0;
-      border-radius: 4px;
-      border: 1px solid #dee2e6;
-    }
-
-    #quiltList {
-      max-height: 400px;
-      overflow-y: auto;
-    }
-
-    .bg-purple {
-      background: #be4adb;
-    }
-
-    .footer a {
-      color: #f2bfff;
-      text-decoration: none;
-      font-size: 0.8rem;
-    }
-
-    .footer a:hover {
-      color: #9d43b4;
-    }
-
-    .footer span {
-      color: #ffffff;
-      font-size: 0.8rem;
-    }
-  </style>
+  <link rel="stylesheet" href="styles/style.css">
 </head>
 
 <body>
-  <!-- I need to figure out how to make a more intuitive way to input arrays of coordinate points for the quilt geometry. 
-   Each small array would be a polygon. 
-   I have the API key, I just need to make sure it isn't visible to the public. Or at least I'm pretty sure it shouldn't be visible to the public.-->
-  <!-- Quilt Form -->
-  <div class="container-lg">
-    <h2>Make a Quilt</h2>
-    <div id="message"></div>
+  <!-- Nav bar - source code: https://getbootstrap.com/docs/5.3/components/navbar/ -->
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <a class="navbar-brand" href="index.html">Site Name</a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
+      aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
 
-    <form id="quiltForm">
-      <div class="form-group">
-        <label for="quiltName">Quilt Name:</label>
-        <input type="text" id="quiltName" required>
-      </div>
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav mr-auto">
+        <li class="nav-item active">
+          <a class="nav-link" href="index.html">Home</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="comic.html">Comic</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="announcements.html">Announcements</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="bts.html">Behind-the-Scenes</a>
+        </li>
+        <li>
+          <a class="nav-link" href="login.html">Log In</a>
+        </li>
+      </ul>
 
-      <div class="form-group">
-        <label for="quiltWidth">Quilt Width (in squares):</label>
-        <input type="number" id="quiltWidth" required min="2" max="10">
-      </div>
-
-      <div class="form-group">
-        <label for="quiltHeight">Quilt Height (in squares):</label>
-        <input type="number" id="quiltHeight" required min="2" max="10">
-      </div>
-
-      <div class="form-group">
-        <label for="squareSize">Square Size (in inches):</label>
-        <input type="number" id="squareSize" required min="5" max="10">
-      </div>
-
-      <button type="submit">Save Quilt</button>
-      <button type="button" onclick="loadQuilts()">Refresh List</button>
-    </form>
-    <br>
-    <p>Support for pattern planning coming soon!</p>
-  </div>
-<!-- Pattern Planner  -->
- <!-- I need to figure out how to make a more intuitive way to input arrays of coordinate points for the quilt geometry. 
-   Each small array would be a polygon. 
-   Unsure whether the API key should be publicly visible or not, but the Desmos site doesn't seem concerned about that in its instructions.-->
- <div class="container-lg">
-<p><strong>Work in Progress!</strong></p>
-  <div id="calculator" style="width: 600px; height: 400px;"></div>
- </div>
-
-  <!-- Quilt Records -->
-  <div class="container-lg">
-    <h2>Quilts</h2>
-    <div id="quiltList">Loading quilt records...</div>
-  </div>
-
-  <!-- footer -->
-  <!-- source: Blog-Admin index.html footer pattern -->
-  <footer>
-    <div class="footer d-flex bg-purple justify-content-center align-items-center gap-3">
-      <span>Tuesday Brown</span>
-      <a target="_blank" href="https://github.com/TuesdayB/turbo-system-devops">GitHub</a>
-      <a target="_blank"
-        href="https://validator.w3.org/nu/?doc=https%3A%2F%2Fquiltmachine.barrycumbie.com%2F">Validator</a>
-      <a target="_blank" href="https://turbo-system-devops.onrender.com/">Render</a>
     </div>
-  </footer>
+  </nav>
 
-  <script>
+  <div class="container-fluid">
+    <h1>INSERT COMIC TITLE HERE</h1>
+  </div>
+
+  <div class="container">
+    <div class="row align-items-start">
+      <div class="col">
+        <div class="container">
+          <p>insert cover image here</p>
+        </div>
+        <div class="container">
+          <br />
+          <a href="#">First</a> <a href="#">Latest</a>
+        </div>
+      </div>
+      <div class="col">
+        <div class="container">
+          <p>Introductory paragraph goes here</p>
+        </div>
+      </div>
+    </div>
+
+
+
+    <!-- <script>
     let editingId = null;
 
     // Handle form submission
@@ -318,20 +188,12 @@
 
     // Set today's date as default
     document.getElementById('date').value = 'February 30, 2026';
-  </script>
+  </script> -->
 
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
-    integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
-    crossorigin="anonymous"></script>
-
-  <script src="scripts/script.js"></script>
-
-  <script src="https://www.desmos.com/api/v1.11/calculator.js?apiKey=4f3e04fd4c374ddb80aaa9a9cb33b8fd"></script>
-  
-  <script>
-  var elt = document.getElementById('calculator');
-  var calculator = Desmos.GraphingCalculator(elt);
-  </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
+      crossorigin="anonymous"></script>
+    <script src="scripts/script.js"></script>
 </body>
 
 </html>
