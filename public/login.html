@@ -6,50 +6,34 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Quilt Machine - CIS 486</title>
 
-    <link rel="stylesheet" href="path/to/normalize.css">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
-        integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://unpkg.com/normalize.css@8.0.1/normalize.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
     <link rel="stylesheet" href="styles/style.css">
 </head>
 
 <body>
-    <!-- Nav bar - source code: https://getbootstrap.com/docs/5.3/components/navbar/ -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-        <a class="navbar-brand" href="index.html">Site Name</a>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
-            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-        </button>
+<div id="Navbar">
+<!-- Nav bar - source code: https://getbootstrap.com/docs/5.3/components/navbar/ -->
+</div>
 
-        <div class="collapse navbar-collapse" id="navbarSupportedContent">
-            <ul class="navbar-nav mr-auto">
-                <li class="nav-item active">
-                    <a class="nav-link" href="index.html">Home</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="comic.html">Comic</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="announcements.html">Announcements</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="bts.html">Behind-the-Scenes</a>
-                </li>
-                <li>
-                    <a class="nav-link" href="login.html">Log In</a>
-                </li>
-            </ul>
+    <div class="container-lg">
+        <form id="loginForm">
+      <div class="form-group">
+        <label for="username">Userame:</label>
+        <input type="text" id="username" required>
+      </div>
 
-        </div>
-    </nav>
-
-    <div class="container">
-        <p>Login Page</p>
+      <div class="form-group">
+        <label for="password">Password:</label>
+        <input type="password" id="password" required>
+      </div>
+      <div id="message"></div>
+      <button type="submit">Log In</button>
+      <a href="/register">New user?</a>
+    </form>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
-        integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
-        crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
     <script src="scripts/script.js"></script>
 </body>
 

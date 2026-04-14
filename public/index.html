@@ -6,193 +6,64 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Quilt Machine - CIS 486</title>
 
-  <link rel="stylesheet" href="path/to/normalize.css">
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
-    integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://unpkg.com/normalize.css@8.0.1/normalize.css">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
   <link rel="stylesheet" href="styles/style.css">
 </head>
 
 <body>
-  <!-- Nav bar - source code: https://getbootstrap.com/docs/5.3/components/navbar/ -->
-  <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-    <a class="navbar-brand" href="index.html">Site Name</a>
+  <div id="Navbar">
+    <!-- Nav bar - source code: https://getbootstrap.com/docs/5.3/components/navbar/ -->
+    <!-- <nav class="navbar navbar-expand-lg bg-blue" data-bs-theme="dark">
+    <a class="navbar-brand" href="/">Space Station 76</a>
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
       aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
     </button>
 
     <div class="collapse navbar-collapse" id="navbarSupportedContent">
-      <ul class="navbar-nav mr-auto">
-        <li class="nav-item active">
-          <a class="nav-link" href="index.html">Home</a>
+      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+        <li class="nav-item" id="homeLink">
+          <a class="nav-link" href="/">Home</a>
         </li>
-        <li class="nav-item">
-          <a class="nav-link" href="comic.html">Comic</a>
+        <li class="nav-item" id="comicLink">
+          <a class="nav-link" href="/comic">Comic</a>
         </li>
-        <li class="nav-item">
-          <a class="nav-link" href="announcements.html">Announcements</a>
+        <li class="nav-item" id="announceLink">
+          <a class="nav-link" href="/announcements">Announcements</a>
         </li>
-        <li class="nav-item">
-          <a class="nav-link" href="bts.html">Behind-the-Scenes</a>
+        <li class="nav-item" id="btsLink">
+          <a class="nav-link" href="/behindthescenes">Behind-the-Scenes</a>
         </li>
-        <li>
-          <a class="nav-link" href="login.html">Log In</a>
+        <li class="nav-item" id="loginLink">
+            <a class="nav-link" href="/login">Log In</a>
         </li>
       </ul>
-
     </div>
-  </nav>
+  </nav> -->
+  </div>
 
-  <div class="container-fluid">
+  <div class="container-lg">
     <h1>INSERT COMIC TITLE HERE</h1>
   </div>
 
-  <div class="container">
+  <div class="container-lg">
     <div class="row align-items-start">
       <div class="col">
-        <div class="container">
-          <p>insert cover image here</p>
+        <div class="container-lg">
+          <p>Intro paragraph goes here</p>
         </div>
-        <div class="container">
+      </div>
+      <div class="col">
+        <div class="container-lg" id='testzone'>
           <br />
           <a href="#">First</a> <a href="#">Latest</a>
         </div>
       </div>
-      <div class="col">
-        <div class="container">
-          <p>Introductory paragraph goes here</p>
-        </div>
-      </div>
     </div>
 
-
-
-    <!-- <script>
-    let editingId = null;
-
-    // Handle form submission
-    document.getElementById('quiltForm').addEventListener('submit', async (e) => {
-      e.preventDefault();
-
-      const quiltName = document.getElementById('quiltName').value;
-      const quiltWidth = document.getElementById('quiltWidth').value;
-      const quiltHeight = document.getElementById('quiltHeight').value;
-      const squareSize = document.getElementById('squareSize').value;
-
-      try {
-        const url = editingId ? `/api/quilts/${editingId}` : '/api/quilts';
-        const method = editingId ? 'PUT' : 'POST';
-
-        const response = await fetch(url, {
-          method: method,
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            quiltName,
-            quiltWidth,
-            quiltHeight,
-            squareSize
-          })
-        });
-
-        const result = await response.json();
-
-        if (response.ok) {
-          showMessage(result.message, 'success');
-          document.getElementById('quiltForm').reset();
-          if (editingId) {
-            editingId = null;
-            document.querySelector('button[type="submit"]').textContent = 'Save Quilt';
-          }
-          loadQuilts();
-        } else {
-          showMessage(result.error, 'error');
-        }
-      } catch (error) {
-        showMessage('Error submitting form', 'error');
-      }
-    });
-
-    // Load quilt records
-    async function loadQuilts() {
-      try {
-        const response = await fetch('/api/quilts');
-        const records = await response.json();
-
-        const listDiv = document.getElementById('quiltList');
-
-        if (records.length === 0) {
-          listDiv.innerHTML = '<p>No quilt records yet.</p>';
-          return;
-        }
-
-        listDiv.innerHTML = records.map(record => `
-          <div class="record">
-            <strong>${record.quiltName}</strong><br>
-            <small>Dimensions: ${record.quiltWidth} x ${record.quiltHeight} | Recorded: ${new Date(record.timestamp).toLocaleString()}</small><br>
-            <button class="edit-btn" onclick="editRecord('${record._id}', '${record.quiltName}', '${record.quiltWidth}', '${record.quiltHeight}','${record.squareSize}')">Edit</button>
-            <button class="delete-btn" onclick="deleteRecord('${record._id}')">Delete</button>
-          </div>
-        `).join('');
-      } catch (error) {
-        document.getElementById('quiltList').innerHTML = 'Error loading quilt records';
-      }
-    }
-
-    // Edit record
-    function editRecord(id, quiltName, quiltWidth, quiltHeight, squareSize) {
-      editingId = id;
-      document.getElementById('quiltName').value = quiltName;
-      document.getElementById('quiltWidth').value = quiltWidth;
-      document.getElementById('quiltHeight').value = quiltHeight;
-      document.getElementById('squareSize').value = squareSize;
-      document.querySelector('button[type="submit"]').textContent = 'Update Quilt';
-      showMessage('Editing record - click Update to save changes', 'success');
-    }
-
-    // Delete record
-    async function deleteRecord(id) {
-      if (!confirm('Are you sure you want to delete this record?')) return;
-
-      try {
-        const response = await fetch(`/api/quilts/${id}`, {
-          method: 'DELETE'
-        });
-
-        const result = await response.json();
-
-        if (response.ok) {
-          showMessage(result.message, 'success');
-          loadQuilts();
-        } else {
-          showMessage(result.error, 'error');
-        }
-      } catch (error) {
-        showMessage('Error deleting record', 'error');
-      }
-    }
-
-    // Show message
-    function showMessage(text, type) {
-      const messageDiv = document.getElementById('message');
-      messageDiv.innerHTML = `<div class="message ${type}">${text}</div>`;
-      setTimeout(() => {
-        messageDiv.innerHTML = '';
-      }, 3000);
-    }
-
-    // Initialize page
-    loadDesmosInfo();
-    loadQuilts();
-
-    // Set today's date as default
-    document.getElementById('date').value = 'February 30, 2026';
-  </script> -->
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
-      integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
-      crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
     <script src="scripts/script.js"></script>
 </body>
 

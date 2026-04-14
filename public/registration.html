@@ -17,8 +17,25 @@
         <!-- Nav bar - source code: https://getbootstrap.com/docs/5.3/components/navbar/ -->
     </div>
 
-    <div class="container">
-        <p>Announcements go here</p>
+    <div class="container-lg">
+        <form id="loginForm">
+            <div class="form-group">
+                <label for="username">Userame:</label>
+                <input type="text" id="username" required>
+            </div>
+
+            <div class="form-group">
+                <label for="password">Password:</label>
+                <input type="password" id="password" required>
+            </div>
+
+            <div class="form-group">
+                <label for="password">Confirm Password:</label>
+                <input type="password" id="confirmPassword" required>
+            </div>
+            <div id="message"></div>
+            <button type="submit">Sign Up</button>
+        </form>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"

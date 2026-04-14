@@ -7,15 +7,13 @@ import { dirname, join } from 'path';
 import { readFile } from 'fs/promises';  // For async file reading
 import { MongoClient, ServerApiVersion, ObjectId } from 'mongodb';
 
-//const { MongoClient, ServerApiVersion } = require('mongodb');
-
 
 const app = express();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const uri = process.env.MONGO_URI;
-const myVar = 'injected from server'; // Declare your variable
-const desmosKey = process.env.DESMOS_KEY;
+
+// const myVar = 'injected from server'; // Declare your variable
 
 app.use(express.static(join(__dirname, 'public')));
 app.use(express.json());
@@ -31,7 +29,6 @@ const client = new MongoClient(uri, {
     deprecationErrors: true,
   }
 });
-
 async function connectToMongo() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
@@ -48,23 +45,42 @@ connectToMongo();
 // middlewares aka endpoints aka 'get to slash' {http verb} to slash {you name ur endpoint}
 app.get('/', (req, res) => {
   // res.send('Hello Express'); //string response
-  // res.sendFile('index.html'); // <- this don't work w/o imports, assign, and arguements
   res.sendFile(join(__dirname, 'public', 'index.html'));
-
 })
 
-app.get('/inject', (req, res) => {
-  // Inject a server variable into barry.html: templating view like ejs or pug
-  readFile(join(__dirname, 'public', 'index.html'), 'utf8')
-    .then(html => {
-      // Replace a placeholder in the HTML (e.g., {{myVar}})
-      const injectedHtml = html.replace('{{myVar}}', myVar);
-      res.send(injectedHtml);
-    })
-    .catch(err => {
-      res.status(500).send('Error loading page');
-    });
+app.get('/comic', (req, res) => {
+  res.sendFile(join(__dirname, 'public', 'comic.html'));
 })
+
+app.get('/announcements', (req, res) => {
+  res.sendFile(join(__dirname, 'public', 'announcements.html'));
+})
+
+app.get('/behindthescenes', (req, res) => {
+  res.sendFile(join(__dirname, 'public', 'bts.html'));
+})
+
+app.get('/login', (req, res) => {
+  res.sendFile(join(__dirname, 'public', 'login.html'));
+})
+
+app.get('/register', (req, res) => {
+  res.sendFile(join(__dirname, 'public', 'registration.html'));
+})
+
+
+// app.get('/inject', (req, res) => {
+//   // Inject a server variable into barry.html: templating view like ejs or pug
+//   readFile(join(__dirname, 'public', 'index.html'), 'utf8')
+//     .then(html => {
+//       // Replace a placeholder in the HTML (e.g., {{myVar}})
+//       const injectedHtml = html.replace('{{myVar}}', myVar);
+//       res.send(injectedHtml);
+//     })
+//     .catch(err => {
+//       res.status(500).send('Error loading page');
+//     });
+// })
 
 // API Health/Endpoints Documentation
 app.get('/api/health', (req, res) => {
@@ -127,94 +143,120 @@ app.get('/api/health', (req, res) => {
 });
 
 // CRUD Operations
+//CREATE - Add user
+// app.post('/api/auth/newUser', async (req, res) => {
+//   try {
+//     const { username, password, confirmPassword } = req.body;
 
-// CREATE - Add quilt
-app.post('/api/quilts', async (req, res) => {
-  try {
-    const { quiltName, quiltWidth, quiltHeight, squareSize } = req.body;
+//     const db = client.db('quiltmachine');
+//     const collection = db.collection('users');
 
-    if (!quiltName || !quiltWidth || !quiltHeight || !squareSize) {
-      return res.status(400).json({ error: 'Missing required fields' });
-    }
+//     //check if username is already in db
+//     //check if passwords match
 
-    const db = client.db('quiltmachine');
-    const collection = db.collection('quilts');
+//     // const quiltRecord = {
+//     //   quiltName,
+//     //   quiltWidth,
+//     //   quiltHeight,
+//     //   squareSize,
+//     //   timestamp: new Date()
+//     // };
 
-    const quiltRecord = {
-      quiltName,
-      quiltWidth,
-      quiltHeight,
-      squareSize,
-      timestamp: new Date()
-    };
+//   //   const result = await collection.insertOne(quiltRecord);
+//   //   res.json({ message: 'Quilt Saved!', id: result.insertedId });
+//   } catch (error) {
+//     console.error('Error creating user:', error);
+//     res.status(500).json({ error: 'Failed to save user' });
+//   }
+// });
 
-    const result = await collection.insertOne(quiltRecord);
-    res.json({ message: 'Quilt Saved!', id: result.insertedId });
-  } catch (error) {
-    console.error('Error creating quilt:', error);
-    res.status(500).json({ error: 'Failed to save quilt' });
-  }
-});
+// // CREATE - Add quilt
+// app.post('/api/quilts', async (req, res) => {
+//   try {
+//     const { quiltName, quiltWidth, quiltHeight, squareSize } = req.body;
 
-// READ - Get all saved quilts
-app.get('/api/quilts', async (req, res) => {
-  try {
-    const db = client.db('quiltmachine');
-    const collection = db.collection('quilts');
+//     if (!quiltName || !quiltWidth || !quiltHeight || !squareSize) {
+//       return res.status(400).json({ error: 'Missing required fields' });
+//     }
 
-    const records = await collection.find({}).toArray();
-    res.json(records);
-  } catch (error) {
-    console.error('Error reading quilt list:', error);
-    res.status(500).json({ error: 'Failed to get quilts' });
-  }
-});
+//     const db = client.db('quiltmachine');
+//     const collection = db.collection('quilts');
 
-// UPDATE - Update record
-app.put('/api/quilts/:id', async (req, res) => {
-  try {
-    const { id } = req.params;
-    const { quiltName, quiltWidth, quiltHeight, squareSize } = req.body;
+//     const quiltRecord = {
+//       quiltName,
+//       quiltWidth,
+//       quiltHeight,
+//       squareSize,
+//       timestamp: new Date()
+//     };
 
-    const db = client.db('quiltmachine');
-    const collection = db.collection('quilts');
-    console.log(id);
-    const result = await collection.updateOne(
-      { _id: new ObjectId(id) },
-      { $set: { quiltName, quiltWidth, quiltHeight, squareSize } }
-    );
+//     const result = await collection.insertOne(quiltRecord);
+//     res.json({ message: 'Quilt Saved!', id: result.insertedId });
+//   } catch (error) {
+//     console.error('Error creating quilt:', error);
+//     res.status(500).json({ error: 'Failed to save quilt' });
+//   }
+// });
 
-    if (result.matchedCount === 0) {
-      return res.status(404).json({ error: 'Record not found' });
-    }
+// // READ - Get all saved quilts
+// app.get('/api/quilts', async (req, res) => {
+//   try {
+//     const db = client.db('quiltmachine');
+//     const collection = db.collection('quilts');
 
-    res.json({ message: 'Quilts updated!' });
-  } catch (error) {
-    console.error('Error updating quilts:', error);
-    res.status(500).json({ error: 'Failed to update quilt' });
-  }
-});
+//     const records = await collection.find({}).toArray();
+//     res.json(records);
+//   } catch (error) {
+//     console.error('Error reading quilt list:', error);
+//     res.status(500).json({ error: 'Failed to get quilts' });
+//   }
+// });
 
-// DELETE - Delete quilt record
-app.delete('/api/quilts/:id', async (req, res) => {
-  try {
-    const { id } = req.params;
+// // UPDATE - Update record
+// app.put('/api/quilts/:id', async (req, res) => {
+//   try {
+//     const { id } = req.params;
+//     const { quiltName, quiltWidth, quiltHeight, squareSize } = req.body;
 
-    const db = client.db('quiltmachine');
-    const collection = db.collection('quilts');
+//     const db = client.db('quiltmachine');
+//     const collection = db.collection('quilts');
+//     console.log(id);
+//     const result = await collection.updateOne(
+//       { _id: new ObjectId(id) },
+//       { $set: { quiltName, quiltWidth, quiltHeight, squareSize } }
+//     );
 
-    const result = await collection.deleteOne({ _id: new ObjectId(id) });
+//     if (result.matchedCount === 0) {
+//       return res.status(404).json({ error: 'Record not found' });
+//     }
 
-    if (result.deletedCount === 0) {
-      return res.status(404).json({ error: 'Record not found' });
-    }
+//     res.json({ message: 'Quilts updated!' });
+//   } catch (error) {
+//     console.error('Error updating quilts:', error);
+//     res.status(500).json({ error: 'Failed to update quilt' });
+//   }
+// });
 
-    res.json({ message: 'Quilt deleted!' });
-  } catch (error) {
-    console.error('Error deleting quilt:', error);
-    res.status(500).json({ error: 'Failed to delete quilt' });
-  }
-});
+// // DELETE - Delete quilt record
+// app.delete('/api/quilts/:id', async (req, res) => {
+//   try {
+//     const { id } = req.params;
+
+//     const db = client.db('quiltmachine');
+//     const collection = db.collection('quilts');
+
+//     const result = await collection.deleteOne({ _id: new ObjectId(id) });
+
+//     if (result.deletedCount === 0) {
+//       return res.status(404).json({ error: 'Record not found' });
+//     }
+
+//     res.json({ message: 'Quilt deleted!' });
+//   } catch (error) {
+//     console.error('Error deleting quilt:', error);
+//     res.status(500).json({ error: 'Failed to delete quilt' });
+//   }
+// });
 
 
 
