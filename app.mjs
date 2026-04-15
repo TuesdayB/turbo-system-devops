@@ -6,6 +6,7 @@ import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 import { readFile } from 'fs/promises';  // For async file reading
 import { MongoClient, ServerApiVersion, ObjectId } from 'mongodb';
+import bcrypt from 'bcrypt';
 
 
 const app = express();
@@ -144,31 +145,38 @@ app.get('/api/health', (req, res) => {
 
 // CRUD Operations
 //CREATE - Add user
-// app.post('/api/auth/newUser', async (req, res) => {
-//   try {
-//     const { username, password, confirmPassword } = req.body;
+app.post('/api/auth/newuser', async (req, res) => {
+  try {
+    const { username, password, confirmPassword } = req.body;
+    const db = client.db('quiltmachine');
+    const collection = db.collection('users');
 
-//     const db = client.db('quiltmachine');
-//     const collection = db.collection('users');
+    const user = await collection.findOne({ username: username });
 
-//     //check if username is already in db
-//     //check if passwords match
+    if (user) {
+      throw Error("Username unavailable");
+    }
 
-//     // const quiltRecord = {
-//     //   quiltName,
-//     //   quiltWidth,
-//     //   quiltHeight,
-//     //   squareSize,
-//     //   timestamp: new Date()
-//     // };
+    if (password != confirmPassword) {
+      throw Error("Passwords do not match");
+    }
 
-//   //   const result = await collection.insertOne(quiltRecord);
-//   //   res.json({ message: 'Quilt Saved!', id: result.insertedId });
-//   } catch (error) {
-//     console.error('Error creating user:', error);
-//     res.status(500).json({ error: 'Failed to save user' });
-//   }
-// });
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const newUser = {
+      username,
+      password: hashedPassword,
+      dateCreated: new Date(),
+      hasAdmin: false
+    };
+
+    const result = await collection.insertOne(newUser);
+    res.json({ message: 'User Saved!', id: result.insertedId });
+  } catch (error) {
+    console.error('Error creating user:', error);
+    res.status(500).json({ error: '' + error });
+  }
+});
 
 // // CREATE - Add quilt
 // app.post('/api/quilts', async (req, res) => {

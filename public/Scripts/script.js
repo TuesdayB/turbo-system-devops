@@ -128,7 +128,7 @@ function loadNavbar() {
         const navbarDiv = document.getElementById('Navbar');
         currentPath = window.location.pathname;
 
-navbarDiv.innerHTML = '  <!-- Nav bar - source code: https://getbootstrap.com/docs/5.3/components/navbar/ --> <nav class="navbar navbar-expand-lg bg-blue" data-bs-theme="dark"> <a class="navbar-brand" href="/">Space Station 76</a> <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation"> <span class="navbar-toggler-icon"></span> </button> <div class="collapse navbar-collapse" id="navbarSupportedContent"> <ul class="navbar-nav me-auto mb-2 mb-lg-0"> <li class="nav-item" id="homeLink"> <a class="nav-link" href="/">Home</a> </li><li class="nav-item" id="comicLink"> <a class="nav-link" href="/comic">Comic</a> </li> <li class="nav-item" id="announceLink"> <a class="nav-link" href="/announcements">Announcements</a> </li><li class="nav-item" id="btsLink"> <a class="nav-link" href="/behindthescenes">Behind-the-Scenes</a> </li> <li class="nav-item" id="loginLink"> <a class="nav-link" href="/login">Log In</a> </li> </ul> </div> </nav>'
+        navbarDiv.innerHTML = '  <!-- Nav bar - source code: https://getbootstrap.com/docs/5.3/components/navbar/ --> <nav class="navbar navbar-expand-lg bg-blue" data-bs-theme="dark"> <a class="navbar-brand" href="/">Space Station 76</a> <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation"> <span class="navbar-toggler-icon"></span> </button> <div class="collapse navbar-collapse" id="navbarSupportedContent"> <ul class="navbar-nav me-auto mb-2 mb-lg-0"> <li class="nav-item" id="homeLink"> <a class="nav-link" href="/">Home</a> </li><li class="nav-item" id="comicLink"> <a class="nav-link" href="/comic">Comic</a> </li> <li class="nav-item" id="announceLink"> <a class="nav-link" href="/announcements">Announcements</a> </li><li class="nav-item" id="btsLink"> <a class="nav-link" href="/behindthescenes">Behind-the-Scenes</a> </li> <li class="nav-item" id="loginLink"> <a class="nav-link" href="/login">Log In</a> </li> </ul> </div> </nav>'
 
         homeLink = document.getElementById('homeLink');
         comicLink = document.getElementById('comicLink');
@@ -137,10 +137,9 @@ navbarDiv.innerHTML = '  <!-- Nav bar - source code: https://getbootstrap.com/do
         loginLink = document.getElementById('loginLink');
 
         //Highlights the nav link if user is currently on its corresponding page
-        switch(currentPath){
+        switch (currentPath) {
             case "/":
                 homeLink.innerHTML = '<a class="nav-link active" href="/">Home</a>';
-                console.log("on home page");
                 break;
             case "/comic":
                 comicLink.innerHTML = '<a class="nav-link active" href="/comic">Comic</a>';
@@ -159,8 +158,18 @@ navbarDiv.innerHTML = '  <!-- Nav bar - source code: https://getbootstrap.com/do
         }
     } catch (error) {
         document.getElementById('Navbar').innerHTML = 'Error loading nav bar';
-      }
+    }
 }
+
+function showMessage(text) {
+    const messageDiv = document.getElementById('message');
+    messageDiv.innerHTML = `<p>${text}</p>`;
+    setTimeout(() => {
+        messageDiv.innerHTML = '';
+    }, 3000);
+}
+
+
 
 //Initialize Page
 loadNavbar();
