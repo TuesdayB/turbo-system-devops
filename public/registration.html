@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register - Space Station 76</title>
+    <link rel="icon" href="https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fupload.wikimedia.org%2Fwikipedia%2Fcommons%2Fthumb%2F8%2F80%2FIcon_planet.svg%2F2048px-Icon_planet.svg.png&f=1&nofb=1&ipt=98ae3b60ed94fc2cc298f14918003edcc2e6f95f07652aa0cb40a14e7e099375">
+    <link rel="stylesheet" href="https://unpkg.com/normalize.css@8.0.1/normalize.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+    <link rel="stylesheet" href="styles/style.css">
+</head>
+
+<body>
+    <div id="Navbar">
+        <!-- Nav bar - source code: https://getbootstrap.com/docs/5.3/components/navbar/ -->
+    </div>
+
+    <div class="container-lg">
+        <form id="registrationForm">
+            <div class="form-group">
+                <label for="registerUsername">Userame:</label>
+                <input type="text" id="registerUsername" required maxlength="30">
+            </div>
+
+            <div class="form-group">
+                <label for="registerPassword">Password:</label>
+                <input type="password" id="registerPassword" required minlength="6">
+            </div>
+
+            <div class="form-group">
+                <label for="password">Confirm Password:</label>
+                <input type="password" id="confirmRegisterPassword" required minlength="6">
+            </div>
+            <div id="message"></div>
+            <button type="submit">Sign Up</button>
+        </form>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI"
+        crossorigin="anonymous"></script>
+    <script src="scripts/script.js"></script>
+    <script src="scripts/registration.js"></script>
+</body>
+
+</html>

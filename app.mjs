@@ -6,22 +6,27 @@ import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 import { readFile } from 'fs/promises';  // For async file reading
 import { MongoClient, ServerApiVersion, ObjectId } from 'mongodb';
-
-//const { MongoClient, ServerApiVersion } = require('mongodb');
-
+import bcrypt from 'bcrypt';
+import jwt from 'jsonwebtoken';
 
 const app = express();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const uri = process.env.MONGO_URI;
-const myVar = 'injected from server'; // Declare your variable
-const desmosKey = process.env.DESMOS_KEY;
+const JWT_SECRET = process.env.JWT_SECRET
 
-app.use(express.static(join(__dirname, 'public')));
+//app.use(express.static(join(__dirname, 'public')));
 app.use(express.json());
 
-
-
+app.use(express.static('public', {  
+  setHeaders: (res, path) => {  
+    if (path.endsWith('.js')) {  
+      res.setHeader('Content-Type', 'application/javascript');  
+    } else if (path.endsWith('.css')) {  
+      res.setHeader('Content-Type', 'text/css');  
+    }  
+  }  
+}));
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
 const client = new MongoClient(uri, {
@@ -31,7 +36,6 @@ const client = new MongoClient(uri, {
     deprecationErrors: true,
   }
 });
-
 async function connectToMongo() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
@@ -48,23 +52,35 @@ connectToMongo();
 // middlewares aka endpoints aka 'get to slash' {http verb} to slash {you name ur endpoint}
 app.get('/', (req, res) => {
   // res.send('Hello Express'); //string response
-  // res.sendFile('index.html'); // <- this don't work w/o imports, assign, and arguements
   res.sendFile(join(__dirname, 'public', 'index.html'));
-
 })
-
-app.get('/inject', (req, res) => {
-  // Inject a server variable into barry.html: templating view like ejs or pug
-  readFile(join(__dirname, 'public', 'index.html'), 'utf8')
-    .then(html => {
-      // Replace a placeholder in the HTML (e.g., {{myVar}})
-      const injectedHtml = html.replace('{{myVar}}', myVar);
-      res.send(injectedHtml);
-    })
-    .catch(err => {
-      res.status(500).send('Error loading page');
-    });
+app.get('/comic', (req, res) => {
+  res.sendFile(join(__dirname, 'public', 'comic.html'));
 })
+app.get('/announcements', (req, res) => {
+  res.sendFile(join(__dirname, 'public', 'announcements.html'));
+})
+app.get('/behindthescenes', (req, res) => {
+  res.sendFile(join(__dirname, 'public', 'bts.html'));
+})
+app.get('/login', (req, res) => {
+  res.sendFile(join(__dirname, 'public', 'login.html'));
+})
+app.get('/register', (req, res) => {
+  res.sendFile(join(__dirname, 'public', 'registration.html'));
+})
+// app.get('/inject', (req, res) => {
+//   // Inject a server variable into barry.html: templating view like ejs or pug
+//   readFile(join(__dirname, 'public', 'index.html'), 'utf8')
+//     .then(html => {
+//       // Replace a placeholder in the HTML (e.g., {{myVar}})
+//       const injectedHtml = html.replace('{{myVar}}', myVar);
+//       res.send(injectedHtml);
+//     })
+//     .catch(err => {
+//       res.status(500).send('Error loading page');
+//     });
+// })
 
 // API Health/Endpoints Documentation
 app.get('/api/health', (req, res) => {
@@ -76,9 +92,30 @@ app.get('/api/health', (req, res) => {
     },
     {
       method: 'GET',
-      path: '/inject',
-      description: 'Serve HTML with server-side variable injection'
+      path: '/comic',
+      description: 'Serve comic HTML page'
     },
+    {
+      method: 'GET',
+      path: '/announcements',
+      description: 'Serve announcements HTML page'
+    },
+    {
+      method: 'GET',
+      path: '/behindthescenes',
+      description: 'Serve behind-the-scenes HTML page'
+    },
+    {
+      method: 'GET',
+      path: '/login',
+      description: 'Serve HTML login page'
+    },
+    {
+      method: 'GET',
+      path: '/register',
+      description: 'Serve HTML registration page'
+    },
+
     {
       method: 'GET',
       path: '/api/health',
@@ -126,95 +163,295 @@ app.get('/api/health', (req, res) => {
   });
 });
 
-// CRUD Operations
+function authenticateToken(req, res, next) {
+  const authHeader = req.headers['authorization'];
+  const token = authHeader && authHeader.split(' ')[1]; // Bearer TOKEN
 
-// CREATE - Add quilt
-app.post('/api/quilts', async (req, res) => {
-  try {
-    const { quiltName, quiltWidth, quiltHeight, squareSize } = req.body;
+  if (!token) {
+    return res.status(401).json({
+      error: 'Access token required',
+      message: 'You must be logged in to access this resource'
+    });
+  }
 
-    if (!quiltName || !quiltWidth || !quiltHeight || !squareSize) {
-      return res.status(400).json({ error: 'Missing required fields' });
+  jwt.verify(token, JWT_SECRET, (err, user) => {
+    if (err) {
+      // Token is invalid or expired
+      return res.status(403).json({
+        error: 'Invalid or expired token',
+        message: 'Please log in again'
+      });
     }
 
-    const db = client.db('quiltmachine');
-    const collection = db.collection('quilts');
+    req.user = user; // Contains: { userId, username, iat, exp }
 
-    const quiltRecord = {
-      quiltName,
-      quiltWidth,
-      quiltHeight,
-      squareSize,
-      timestamp: new Date()
+    next();
+  });
+}
+
+
+app.post('/api/auth/register', async (req, res) => {
+  try {
+    const { username, password, confirmPassword } = req.body;
+    const db = client.db('quiltmachine');
+    // const collection = db.collection('users');
+
+    if (!username || !password) {
+      return res.status(400).json({ error: 'Username and password are required' });
+    }
+
+    if (password != confirmPassword) {
+      return res.status(400).json({ error: 'Password fields must match' });
+    }
+
+    if (password.length < 6) {
+      return res.status(400).json({ error: 'Password must be at least 6 characters long' });
+    }
+
+    const existingUser = await db.collection('users').findOne({ username });
+    if (existingUser) {
+      return res.status(400).json({ error: 'Username already exists' });
+    }
+
+    const saltRounds = 10;
+    const hashedPassword = await bcrypt.hash(password, saltRounds);
+
+    const user = {
+      username,
+      password: hashedPassword,
+      dateCreated: new Date(),
+      hasAdmin: false
+    };
+    const result = await db.collection('users').insertOne(user);
+
+    console.log(`✅ New user registered: ${username}`);
+
+    res.status(201).json({
+      message: 'User registered successfully',
+      userId: result.insertedId,
+      username: username
+    });
+  } catch (error) {
+    console.error('❌ Registration error:', error.message);
+    res.status(500).json({ error: 'Failed to register user: ' + error.message });
+  }
+});
+
+app.post('/api/auth/login', async (req, res) => {
+  try {
+    const { username, password } = req.body;
+    const db = client.db('quiltmachine');
+
+    if (!username || !password) {
+      return res.status(400).json({ error: 'Username and password are required' });
+    }
+
+    const user = await db.collection('users').findOne({ username });
+    if (!user) {
+      return res.status(400).json({ error: 'Invalid username or password' });
+    }
+
+    const isValidPassword = await bcrypt.compare(password, user.password);
+    if (!isValidPassword) {
+      return res.status(400).json({ error: 'Invalid username or password' });
+    }
+
+    const tokenPayload = {
+      userId: user._id,
+      username: user.username
     };
 
-    const result = await collection.insertOne(quiltRecord);
-    res.json({ message: 'Quilt Saved!', id: result.insertedId });
+    const token = jwt.sign(tokenPayload, JWT_SECRET, { expiresIn: '24h' });
+
+    console.log(`✅ User logged in: ${username}`);
+
+    res.json({
+      message: 'Login successful',
+      token: token,
+      user: { id: user._id, username: user.username }
+    });
   } catch (error) {
-    console.error('Error creating quilt:', error);
-    res.status(500).json({ error: 'Failed to save quilt' });
+    console.error('❌ Login error:', error.message);
+    res.status(500).json({ error: 'Failed to login: ' + error.message });
   }
 });
 
-// READ - Get all saved quilts
-app.get('/api/quilts', async (req, res) => {
+app.get('/api/auth/me', authenticateToken, async (req, res) => {
   try {
-    const db = client.db('quiltmachine');
-    const collection = db.collection('quilts');
+    console.log('User from token:', req.user);
 
-    const records = await collection.find({}).toArray();
-    res.json(records);
-  } catch (error) {
-    console.error('Error reading quilt list:', error);
-    res.status(500).json({ error: 'Failed to get quilts' });
-  }
-});
-
-// UPDATE - Update record
-app.put('/api/quilts/:id', async (req, res) => {
-  try {
-    const { id } = req.params;
-    const { quiltName, quiltWidth, quiltHeight, squareSize } = req.body;
-
-    const db = client.db('quiltmachine');
-    const collection = db.collection('quilts');
-    console.log(id);
-    const result = await collection.updateOne(
-      { _id: new ObjectId(id) },
-      { $set: { quiltName, quiltWidth, quiltHeight, squareSize } }
+    const user = await db.collection('users').findOne(
+      { _id: new ObjectId(req.user.userId) },
+      { projection: { password: 0 } }
     );
 
-    if (result.matchedCount === 0) {
-      return res.status(404).json({ error: 'Record not found' });
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
     }
 
-    res.json({ message: 'Quilts updated!' });
+    res.json({ user });
   } catch (error) {
-    console.error('Error updating quilts:', error);
-    res.status(500).json({ error: 'Failed to update quilt' });
+    res.status(500).json({ error: 'Failed to get user info: ' + error.message });
   }
 });
 
-// DELETE - Delete quilt record
-app.delete('/api/quilts/:id', async (req, res) => {
-  try {
-    const { id } = req.params;
+// CRUD Operations
+// //CREATE - Add user
+// app.post('/api/auth/newuser', async (req, res) => {
+//   try {
+//     const { username, password, confirmPassword } = req.body;
+//     const db = client.db('quiltmachine');
+//     const collection = db.collection('users');
 
-    const db = client.db('quiltmachine');
-    const collection = db.collection('quilts');
+//     const user = await collection.findOne({ username: username });
 
-    const result = await collection.deleteOne({ _id: new ObjectId(id) });
+//     if (user) {
+//       throw Error("Username unavailable");
+//     }
 
-    if (result.deletedCount === 0) {
-      return res.status(404).json({ error: 'Record not found' });
-    }
+//     if (password != confirmPassword) {
+//       throw Error("Passwords do not match");
+//     }
 
-    res.json({ message: 'Quilt deleted!' });
-  } catch (error) {
-    console.error('Error deleting quilt:', error);
-    res.status(500).json({ error: 'Failed to delete quilt' });
-  }
-});
+//     const hashedPassword = await bcrypt.hash(password, 10);
+
+//     const newUser = {
+//       username,
+//       password: hashedPassword,
+//       dateCreated: new Date(),
+//       hasAdmin: false
+//     };
+
+//     const result = await collection.insertOne(newUser);
+//     res.json({ message: 'User Saved!', id: result.insertedId });
+//   } catch (error) {
+//     console.error('Error creating user:', error);
+//     res.status(500).json({ error: '' + error });
+//   }
+// });
+// //Authenticate User
+// app.post('/api/auth/user', async (req, res) => {
+//   try {
+//     const { username, password } = req.body;
+//     const db = client.db('quiltmachine');
+//     const collection = db.collection('users');
+
+//     const user = await collection.findOne({ username: username });
+
+//     // if (user) {
+//     //   throw Error("Username unavailable");
+//     // }
+
+//     // if (password != confirmPassword) {
+//     //   throw Error("Passwords do not match");
+//     // }
+
+//     // const hashedPassword = await bcrypt.hash(password, 10);
+
+//     // const newUser = {
+//     //   username,
+//     //   password: hashedPassword,
+//     //   dateCreated: new Date(),
+//     //   hasAdmin: false
+//     // };
+
+//     // const result = await collection.insertOne(newUser);
+//     // res.json({ message: 'User Saved!', id: result.insertedId });
+//   } catch (error) {
+//     console.error('Error creating user:', error);
+//     res.status(500).json({ error: '' + error });
+//   }
+// });
+
+
+
+// // CREATE - Add quilt
+// app.post('/api/quilts', async (req, res) => {
+//   try {
+//     const { quiltName, quiltWidth, quiltHeight, squareSize } = req.body;
+
+//     if (!quiltName || !quiltWidth || !quiltHeight || !squareSize) {
+//       return res.status(400).json({ error: 'Missing required fields' });
+//     }
+
+//     const db = client.db('quiltmachine');
+//     const collection = db.collection('quilts');
+
+//     const quiltRecord = {
+//       quiltName,
+//       quiltWidth,
+//       quiltHeight,
+//       squareSize,
+//       timestamp: new Date()
+//     };
+
+//     const result = await collection.insertOne(quiltRecord);
+//     res.json({ message: 'Quilt Saved!', id: result.insertedId });
+//   } catch (error) {
+//     console.error('Error creating quilt:', error);
+//     res.status(500).json({ error: 'Failed to save quilt' });
+//   }
+// });
+
+// // READ - Get all saved quilts
+// app.get('/api/quilts', async (req, res) => {
+//   try {
+//     const db = client.db('quiltmachine');
+//     const collection = db.collection('quilts');
+
+//     const records = await collection.find({}).toArray();
+//     res.json(records);
+//   } catch (error) {
+//     console.error('Error reading quilt list:', error);
+//     res.status(500).json({ error: 'Failed to get quilts' });
+//   }
+// });
+
+// // UPDATE - Update record
+// app.put('/api/quilts/:id', async (req, res) => {
+//   try {
+//     const { id } = req.params;
+//     const { quiltName, quiltWidth, quiltHeight, squareSize } = req.body;
+
+//     const db = client.db('quiltmachine');
+//     const collection = db.collection('quilts');
+//     console.log(id);
+//     const result = await collection.updateOne(
+//       { _id: new ObjectId(id) },
+//       { $set: { quiltName, quiltWidth, quiltHeight, squareSize } }
+//     );
+
+//     if (result.matchedCount === 0) {
+//       return res.status(404).json({ error: 'Record not found' });
+//     }
+
+//     res.json({ message: 'Quilts updated!' });
+//   } catch (error) {
+//     console.error('Error updating quilts:', error);
+//     res.status(500).json({ error: 'Failed to update quilt' });
+//   }
+// });
+
+// // DELETE - Delete quilt record
+// app.delete('/api/quilts/:id', async (req, res) => {
+//   try {
+//     const { id } = req.params;
+
+//     const db = client.db('quiltmachine');
+//     const collection = db.collection('quilts');
+
+//     const result = await collection.deleteOne({ _id: new ObjectId(id) });
+
+//     if (result.deletedCount === 0) {
+//       return res.status(404).json({ error: 'Record not found' });
+//     }
+
+//     res.json({ message: 'Quilt deleted!' });
+//   } catch (error) {
+//     console.error('Error deleting quilt:', error);
+//     res.status(500).json({ error: 'Failed to delete quilt' });
+//   }
+// });
 
 
 
