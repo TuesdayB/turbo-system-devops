@@ -1,10 +1,17 @@
 # Dev Notebook
-### To-Do - 4/13
-- [x] Figure out image hosting
-- [x] Contact client
-- [x] Add background
-- [x] Recolor nav bar
-- [x] Add user create screen
-- [x] Implement logins
-### Notes - 4/13
-I'm well aware I'm behind on this. I'm so well aware of it that my brain is actively fighting my every attempt to even start it. I had never seen an API endpoint in my life until this class, much less used one to connect to a Mongo database, and nobody has explained any of this stuff to me. In other words, you're gonna have to be patient-- I'm a bit of a nervous wreck right now.
+
+### Notes
+I have no idea what I'm supposed to write in a dev-notebook
+### 4/10
+- Nuked most of the base site to install the bones of the new site
+### 4/13
+- Contacted client about design choices and new domain name
+- Added background
+- Recolored nav bar
+### 4/14
+- Added registration page
+- Began work on user registration code
+### 4/15
+- Yoinked user registration/login code from freshly posted [demo](https://github.com/barrycumbie/full-stack-authn-example)
+- Decided on an image host
+- Somehow broke CSS and js when testing the site from anywhere but localhost
