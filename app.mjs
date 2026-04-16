@@ -18,6 +18,16 @@ const JWT_SECRET = process.env.JWT_SECRET
 app.use(express.static(join(__dirname, 'public')));
 app.use(express.json());
 
+app.use(express.static('public', {  
+  setHeaders: (res, path) => {  
+    if (path.endsWith('.js')) {  
+      res.setHeader('Content-Type', 'application/javascript');  
+    } else if (path.endsWith('.css')) {  
+      res.setHeader('Content-Type', 'text/css');  
+    }  
+  }  
+}));
+
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
 const client = new MongoClient(uri, {
   serverApi: {
