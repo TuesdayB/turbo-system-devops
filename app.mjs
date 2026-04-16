@@ -13,9 +13,9 @@ const app = express();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const uri = process.env.MONGO_URI;
-const JWT_SECRET = process.env.JWT_SECRET
+const JWT_SECRET = process.env.JWT_SECRET;
 
-//app.use(express.static(join(__dirname, 'public')));
+app.use(express.static(join(__dirname, 'public')));
 app.use(express.json());
 
 app.use(express.static('public', {  
