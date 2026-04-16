@@ -7,20 +7,16 @@ import { dirname, join } from 'path';
 import { readFile } from 'fs/promises';  // For async file reading
 import { MongoClient, ServerApiVersion, ObjectId } from 'mongodb';
 import bcrypt from 'bcrypt';
-
+import jwt from 'jsonwebtoken';
 
 const app = express();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const uri = process.env.MONGO_URI;
-
-// const myVar = 'injected from server'; // Declare your variable
+const JWT_SECRET = process.env.JWT_SECRET
 
 app.use(express.static(join(__dirname, 'public')));
 app.use(express.json());
-
-
-
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
 const client = new MongoClient(uri, {
@@ -48,28 +44,21 @@ app.get('/', (req, res) => {
   // res.send('Hello Express'); //string response
   res.sendFile(join(__dirname, 'public', 'index.html'));
 })
-
 app.get('/comic', (req, res) => {
   res.sendFile(join(__dirname, 'public', 'comic.html'));
 })
-
 app.get('/announcements', (req, res) => {
   res.sendFile(join(__dirname, 'public', 'announcements.html'));
 })
-
 app.get('/behindthescenes', (req, res) => {
   res.sendFile(join(__dirname, 'public', 'bts.html'));
 })
-
 app.get('/login', (req, res) => {
   res.sendFile(join(__dirname, 'public', 'login.html'));
 })
-
 app.get('/register', (req, res) => {
   res.sendFile(join(__dirname, 'public', 'registration.html'));
 })
-
-
 // app.get('/inject', (req, res) => {
 //   // Inject a server variable into barry.html: templating view like ejs or pug
 //   readFile(join(__dirname, 'public', 'index.html'), 'utf8')
@@ -93,9 +82,30 @@ app.get('/api/health', (req, res) => {
     },
     {
       method: 'GET',
-      path: '/inject',
-      description: 'Serve HTML with server-side variable injection'
+      path: '/comic',
+      description: 'Serve comic HTML page'
     },
+    {
+      method: 'GET',
+      path: '/announcements',
+      description: 'Serve announcements HTML page'
+    },
+    {
+      method: 'GET',
+      path: '/behindthescenes',
+      description: 'Serve behind-the-scenes HTML page'
+    },
+    {
+      method: 'GET',
+      path: '/login',
+      description: 'Serve HTML login page'
+    },
+    {
+      method: 'GET',
+      path: '/register',
+      description: 'Serve HTML registration page'
+    },
+
     {
       method: 'GET',
       path: '/api/health',
@@ -143,40 +153,207 @@ app.get('/api/health', (req, res) => {
   });
 });
 
-// CRUD Operations
-//CREATE - Add user
-app.post('/api/auth/newuser', async (req, res) => {
+function authenticateToken(req, res, next) {
+  const authHeader = req.headers['authorization'];
+  const token = authHeader && authHeader.split(' ')[1]; // Bearer TOKEN
+
+  if (!token) {
+    return res.status(401).json({
+      error: 'Access token required',
+      message: 'You must be logged in to access this resource'
+    });
+  }
+
+  jwt.verify(token, JWT_SECRET, (err, user) => {
+    if (err) {
+      // Token is invalid or expired
+      return res.status(403).json({
+        error: 'Invalid or expired token',
+        message: 'Please log in again'
+      });
+    }
+
+    req.user = user; // Contains: { userId, username, iat, exp }
+
+    next();
+  });
+}
+
+
+app.post('/api/auth/register', async (req, res) => {
   try {
     const { username, password, confirmPassword } = req.body;
     const db = client.db('quiltmachine');
-    const collection = db.collection('users');
+    // const collection = db.collection('users');
 
-    const user = await collection.findOne({ username: username });
-
-    if (user) {
-      throw Error("Username unavailable");
+    if (!username || !password) {
+      return res.status(400).json({ error: 'Username and password are required' });
     }
 
     if (password != confirmPassword) {
-      throw Error("Passwords do not match");
+      return res.status(400).json({ error: 'Password fields must match' });
     }
 
-    const hashedPassword = await bcrypt.hash(password, 10);
+    if (password.length < 6) {
+      return res.status(400).json({ error: 'Password must be at least 6 characters long' });
+    }
 
-    const newUser = {
+    const existingUser = await db.collection('users').findOne({ username });
+    if (existingUser) {
+      return res.status(400).json({ error: 'Username already exists' });
+    }
+
+    const saltRounds = 10;
+    const hashedPassword = await bcrypt.hash(password, saltRounds);
+
+    const user = {
       username,
       password: hashedPassword,
       dateCreated: new Date(),
       hasAdmin: false
     };
+    const result = await db.collection('users').insertOne(user);
 
-    const result = await collection.insertOne(newUser);
-    res.json({ message: 'User Saved!', id: result.insertedId });
+    console.log(`✅ New user registered: ${username}`);
+
+    res.status(201).json({
+      message: 'User registered successfully',
+      userId: result.insertedId,
+      username: username
+    });
   } catch (error) {
-    console.error('Error creating user:', error);
-    res.status(500).json({ error: '' + error });
+    console.error('❌ Registration error:', error.message);
+    res.status(500).json({ error: 'Failed to register user: ' + error.message });
   }
 });
+
+app.post('/api/auth/login', async (req, res) => {
+  try {
+    const { username, password } = req.body;
+    const db = client.db('quiltmachine');
+
+    if (!username || !password) {
+      return res.status(400).json({ error: 'Username and password are required' });
+    }
+
+    const user = await db.collection('users').findOne({ username });
+    if (!user) {
+      return res.status(400).json({ error: 'Invalid username or password' });
+    }
+
+    const isValidPassword = await bcrypt.compare(password, user.password);
+    if (!isValidPassword) {
+      return res.status(400).json({ error: 'Invalid username or password' });
+    }
+
+    const tokenPayload = {
+      userId: user._id,
+      username: user.username
+    };
+
+    const token = jwt.sign(tokenPayload, JWT_SECRET, { expiresIn: '24h' });
+
+    console.log(`✅ User logged in: ${username}`);
+
+    res.json({
+      message: 'Login successful',
+      token: token,
+      user: { id: user._id, username: user.username }
+    });
+  } catch (error) {
+    console.error('❌ Login error:', error.message);
+    res.status(500).json({ error: 'Failed to login: ' + error.message });
+  }
+});
+
+app.get('/api/auth/me', authenticateToken, async (req, res) => {
+  try {
+    console.log('User from token:', req.user);
+
+    const user = await db.collection('users').findOne(
+      { _id: new ObjectId(req.user.userId) },
+      { projection: { password: 0 } }
+    );
+
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    res.json({ user });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to get user info: ' + error.message });
+  }
+});
+
+// CRUD Operations
+// //CREATE - Add user
+// app.post('/api/auth/newuser', async (req, res) => {
+//   try {
+//     const { username, password, confirmPassword } = req.body;
+//     const db = client.db('quiltmachine');
+//     const collection = db.collection('users');
+
+//     const user = await collection.findOne({ username: username });
+
+//     if (user) {
+//       throw Error("Username unavailable");
+//     }
+
+//     if (password != confirmPassword) {
+//       throw Error("Passwords do not match");
+//     }
+
+//     const hashedPassword = await bcrypt.hash(password, 10);
+
+//     const newUser = {
+//       username,
+//       password: hashedPassword,
+//       dateCreated: new Date(),
+//       hasAdmin: false
+//     };
+
+//     const result = await collection.insertOne(newUser);
+//     res.json({ message: 'User Saved!', id: result.insertedId });
+//   } catch (error) {
+//     console.error('Error creating user:', error);
+//     res.status(500).json({ error: '' + error });
+//   }
+// });
+// //Authenticate User
+// app.post('/api/auth/user', async (req, res) => {
+//   try {
+//     const { username, password } = req.body;
+//     const db = client.db('quiltmachine');
+//     const collection = db.collection('users');
+
+//     const user = await collection.findOne({ username: username });
+
+//     // if (user) {
+//     //   throw Error("Username unavailable");
+//     // }
+
+//     // if (password != confirmPassword) {
+//     //   throw Error("Passwords do not match");
+//     // }
+
+//     // const hashedPassword = await bcrypt.hash(password, 10);
+
+//     // const newUser = {
+//     //   username,
+//     //   password: hashedPassword,
+//     //   dateCreated: new Date(),
+//     //   hasAdmin: false
+//     // };
+
+//     // const result = await collection.insertOne(newUser);
+//     // res.json({ message: 'User Saved!', id: result.insertedId });
+//   } catch (error) {
+//     console.error('Error creating user:', error);
+//     res.status(500).json({ error: '' + error });
+//   }
+// });
+
+
 
 // // CREATE - Add quilt
 // app.post('/api/quilts', async (req, res) => {
