@@ -28,6 +28,11 @@ app.use(express.static('public', {
   }  
 }));
 
+app.get('/script.js', (req, res) => {  
+  res.setHeader('Content-Type', 'application/javascript'); // Critical!  
+  res.send('console.log("Hello from dynamic JS!");');  
+});
+
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
 const client = new MongoClient(uri, {
   serverApi: {
