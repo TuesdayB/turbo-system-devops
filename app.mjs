@@ -15,18 +15,18 @@ const __dirname = dirname(__filename);
 const uri = process.env.MONGO_URI;
 const JWT_SECRET = process.env.JWT_SECRET;
 
-app.use(express.static(join(__dirname, 'public')));
+app.use(express.static(join(__dirname, '/public')));
 app.use(express.json());
 
-app.use(express.static('public', {  
-  setHeaders: (res, path) => {  
-    if (path.endsWith('.js')) {  
-      res.setHeader('Content-Type', 'application/javascript');  
-    } else if (path.endsWith('.css')) {  
-      res.setHeader('Content-Type', 'text/css');  
-    }  
-  }  
-}));
+// app.use(express.static('public', {  
+//   setHeaders: (res, path) => {  
+//     if (path.endsWith('.js')) {  
+//       res.setHeader('Content-Type', 'application/javascript');  
+//     } else if (path.endsWith('.css')) {  
+//       res.setHeader('Content-Type', 'text/css');  
+//     }  
+//   }  
+// }));
 
 app.get('/script.js', (req, res) => {  
   res.setHeader('Content-Type', 'application/javascript'); // Critical!  
