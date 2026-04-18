@@ -18,21 +18,6 @@ const JWT_SECRET = process.env.JWT_SECRET;
 app.use(express.static(join(__dirname, '/public')));
 app.use(express.json());
 
-// app.use(express.static('public', {  
-//   setHeaders: (res, path) => {  
-//     if (path.endsWith('.js')) {  
-//       res.setHeader('Content-Type', 'application/javascript');  
-//     } else if (path.endsWith('.css')) {  
-//       res.setHeader('Content-Type', 'text/css');  
-//     }  
-//   }  
-// }));
-
-app.get('/script.js', (req, res) => {  
-  res.setHeader('Content-Type', 'application/javascript'); // Critical!  
-  res.send('console.log("Hello from dynamic JS!");');  
-});
-
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
 const client = new MongoClient(uri, {
   serverApi: {
@@ -53,6 +38,7 @@ async function connectToMongo() {
   }
 }
 connectToMongo();
+const db = client.db('quiltmachine');
 
 // middlewares aka endpoints aka 'get to slash' {http verb} to slash {you name ur endpoint}
 app.get('/', (req, res) => {
@@ -193,12 +179,9 @@ function authenticateToken(req, res, next) {
   });
 }
 
-
 app.post('/api/auth/register', async (req, res) => {
   try {
     const { username, password, confirmPassword } = req.body;
-    const db = client.db('quiltmachine');
-    // const collection = db.collection('users');
 
     if (!username || !password) {
       return res.status(400).json({ error: 'Username and password are required' });
@@ -244,8 +227,6 @@ app.post('/api/auth/register', async (req, res) => {
 app.post('/api/auth/login', async (req, res) => {
   try {
     const { username, password } = req.body;
-    const db = client.db('quiltmachine');
-
     if (!username || !password) {
       return res.status(400).json({ error: 'Username and password are required' });
     }
@@ -282,8 +263,7 @@ app.post('/api/auth/login', async (req, res) => {
 
 app.get('/api/auth/me', authenticateToken, async (req, res) => {
   try {
-    console.log('User from token:', req.user);
-    const db = client.db('quiltmachine');
+    // console.log('User from token:', req.user);
     const user = await db.collection('users').findOne(
       { _id: new ObjectId(req.user.userId) },
       { projection: { password: 0 } }
@@ -299,164 +279,212 @@ app.get('/api/auth/me', authenticateToken, async (req, res) => {
   }
 });
 
+//CREATE - New comic page
+app.post('/api/comics', authenticateToken, async (req, res) => {
+  try {
+    const { title, index, pageLink } = req.body;
+
+    // Simple validation
+    if (!title || !index || !pageLink) {
+      return res.status(400).json({ error: 'Title, page index, and page link are all required' });
+    }
+    
+    const existingPageIndex = await db.collection('comics').findOne({ index });
+    if (existingPageIndex) {
+      return res.status(400).json({ error: `Page ${index} already exists` });
+    }
+
+    const page = {
+      title,
+      index,
+      pageLink,
+      postedBy: req.user.username,
+      postedAt: new Date()
+    }
+
+    const result = await db.collection('comics').insertOne(page);
+    console.log(`✅ Comic published by ${req.user.username}: ${title}`);
+
+    res.status(201).json({
+      message: 'Page created successfully',
+      comicId: result.insertedId,
+      page: { ...page, _id: result.insertedId }
+    });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to create comic page: ' + error.message });
+  }
+});
+
+// READ - Get all pages (PROTECTED)
+app.get('/api/comics', authenticateToken, async (req, res) => {
+  try {
+    const comics = await db.collection('comics').find({}).toArray();
+    console.log(`📋 ${req.user.username} viewed ${comics.length} comics`);
+    res.json(comics); // Return just the array for frontend simplicity
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to fetch comics: ' + error.message });
+  }
+});
+
+/*
 // CRUD Operations
-// //CREATE - Add user
-// app.post('/api/auth/newuser', async (req, res) => {
-//   try {
-//     const { username, password, confirmPassword } = req.body;
-//     const db = client.db('quiltmachine');
-//     const collection = db.collection('users');
+//CREATE - Add user
+app.post('/api/auth/newuser', async (req, res) => {
+  try {
+    const { username, password, confirmPassword } = req.body;
+    const db = client.db('quiltmachine');
+    const collection = db.collection('users');
 
-//     const user = await collection.findOne({ username: username });
+    const user = await collection.findOne({ username: username });
 
-//     if (user) {
-//       throw Error("Username unavailable");
-//     }
+    if (user) {
+      throw Error("Username unavailable");
+    }
 
-//     if (password != confirmPassword) {
-//       throw Error("Passwords do not match");
-//     }
+    if (password != confirmPassword) {
+      throw Error("Passwords do not match");
+    }
 
-//     const hashedPassword = await bcrypt.hash(password, 10);
+    const hashedPassword = await bcrypt.hash(password, 10);
 
-//     const newUser = {
-//       username,
-//       password: hashedPassword,
-//       dateCreated: new Date(),
-//       hasAdmin: false
-//     };
+    const newUser = {
+      username,
+      password: hashedPassword,
+      dateCreated: new Date(),
+      hasAdmin: false
+    };
 
-//     const result = await collection.insertOne(newUser);
-//     res.json({ message: 'User Saved!', id: result.insertedId });
-//   } catch (error) {
-//     console.error('Error creating user:', error);
-//     res.status(500).json({ error: '' + error });
-//   }
-// });
-// //Authenticate User
-// app.post('/api/auth/user', async (req, res) => {
-//   try {
-//     const { username, password } = req.body;
-//     const db = client.db('quiltmachine');
-//     const collection = db.collection('users');
+    const result = await collection.insertOne(newUser);
+    res.json({ message: 'User Saved!', id: result.insertedId });
+  } catch (error) {
+    console.error('Error creating user:', error);
+    res.status(500).json({ error: '' + error });
+  }
+});
+//Authenticate User
+app.post('/api/auth/user', async (req, res) => {
+  try {
+    const { username, password } = req.body;
+    const db = client.db('quiltmachine');
+    const collection = db.collection('users');
 
-//     const user = await collection.findOne({ username: username });
+    const user = await collection.findOne({ username: username });
 
-//     // if (user) {
-//     //   throw Error("Username unavailable");
-//     // }
+    // if (user) {
+    //   throw Error("Username unavailable");
+    // }
 
-//     // if (password != confirmPassword) {
-//     //   throw Error("Passwords do not match");
-//     // }
+    // if (password != confirmPassword) {
+    //   throw Error("Passwords do not match");
+    // }
 
-//     // const hashedPassword = await bcrypt.hash(password, 10);
+    // const hashedPassword = await bcrypt.hash(password, 10);
 
-//     // const newUser = {
-//     //   username,
-//     //   password: hashedPassword,
-//     //   dateCreated: new Date(),
-//     //   hasAdmin: false
-//     // };
+    // const newUser = {
+    //   username,
+    //   password: hashedPassword,
+    //   dateCreated: new Date(),
+    //   hasAdmin: false
+    // };
 
-//     // const result = await collection.insertOne(newUser);
-//     // res.json({ message: 'User Saved!', id: result.insertedId });
-//   } catch (error) {
-//     console.error('Error creating user:', error);
-//     res.status(500).json({ error: '' + error });
-//   }
-// });
+    // const result = await collection.insertOne(newUser);
+    // res.json({ message: 'User Saved!', id: result.insertedId });
+  } catch (error) {
+    console.error('Error creating user:', error);
+    res.status(500).json({ error: '' + error });
+  }
+});
 
 
 
-// // CREATE - Add quilt
-// app.post('/api/quilts', async (req, res) => {
-//   try {
-//     const { quiltName, quiltWidth, quiltHeight, squareSize } = req.body;
+// CREATE - Add quilt
+app.post('/api/quilts', async (req, res) => {
+  try {
+    const { quiltName, quiltWidth, quiltHeight, squareSize } = req.body;
 
-//     if (!quiltName || !quiltWidth || !quiltHeight || !squareSize) {
-//       return res.status(400).json({ error: 'Missing required fields' });
-//     }
+    if (!quiltName || !quiltWidth || !quiltHeight || !squareSize) {
+      return res.status(400).json({ error: 'Missing required fields' });
+    }
 
-//     const db = client.db('quiltmachine');
-//     const collection = db.collection('quilts');
+    const db = client.db('quiltmachine');
+    const collection = db.collection('quilts');
 
-//     const quiltRecord = {
-//       quiltName,
-//       quiltWidth,
-//       quiltHeight,
-//       squareSize,
-//       timestamp: new Date()
-//     };
+    const quiltRecord = {
+      quiltName,
+      quiltWidth,
+      quiltHeight,
+      squareSize,
+      timestamp: new Date()
+    };
 
-//     const result = await collection.insertOne(quiltRecord);
-//     res.json({ message: 'Quilt Saved!', id: result.insertedId });
-//   } catch (error) {
-//     console.error('Error creating quilt:', error);
-//     res.status(500).json({ error: 'Failed to save quilt' });
-//   }
-// });
+    const result = await collection.insertOne(quiltRecord);
+    res.json({ message: 'Quilt Saved!', id: result.insertedId });
+  } catch (error) {
+    console.error('Error creating quilt:', error);
+    res.status(500).json({ error: 'Failed to save quilt' });
+  }
+});
 
-// // READ - Get all saved quilts
-// app.get('/api/quilts', async (req, res) => {
-//   try {
-//     const db = client.db('quiltmachine');
-//     const collection = db.collection('quilts');
+// READ - Get all saved quilts
+app.get('/api/quilts', async (req, res) => {
+  try {
+    const db = client.db('quiltmachine');
+    const collection = db.collection('quilts');
 
-//     const records = await collection.find({}).toArray();
-//     res.json(records);
-//   } catch (error) {
-//     console.error('Error reading quilt list:', error);
-//     res.status(500).json({ error: 'Failed to get quilts' });
-//   }
-// });
+    const records = await collection.find({}).toArray();
+    res.json(records);
+  } catch (error) {
+    console.error('Error reading quilt list:', error);
+    res.status(500).json({ error: 'Failed to get quilts' });
+  }
+});
 
-// // UPDATE - Update record
-// app.put('/api/quilts/:id', async (req, res) => {
-//   try {
-//     const { id } = req.params;
-//     const { quiltName, quiltWidth, quiltHeight, squareSize } = req.body;
+// UPDATE - Update record
+app.put('/api/quilts/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { quiltName, quiltWidth, quiltHeight, squareSize } = req.body;
 
-//     const db = client.db('quiltmachine');
-//     const collection = db.collection('quilts');
-//     console.log(id);
-//     const result = await collection.updateOne(
-//       { _id: new ObjectId(id) },
-//       { $set: { quiltName, quiltWidth, quiltHeight, squareSize } }
-//     );
+    const db = client.db('quiltmachine');
+    const collection = db.collection('quilts');
+    console.log(id);
+    const result = await collection.updateOne(
+      { _id: new ObjectId(id) },
+      { $set: { quiltName, quiltWidth, quiltHeight, squareSize } }
+    );
 
-//     if (result.matchedCount === 0) {
-//       return res.status(404).json({ error: 'Record not found' });
-//     }
+    if (result.matchedCount === 0) {
+      return res.status(404).json({ error: 'Record not found' });
+    }
 
-//     res.json({ message: 'Quilts updated!' });
-//   } catch (error) {
-//     console.error('Error updating quilts:', error);
-//     res.status(500).json({ error: 'Failed to update quilt' });
-//   }
-// });
+    res.json({ message: 'Quilts updated!' });
+  } catch (error) {
+    console.error('Error updating quilts:', error);
+    res.status(500).json({ error: 'Failed to update quilt' });
+  }
+});
 
-// // DELETE - Delete quilt record
-// app.delete('/api/quilts/:id', async (req, res) => {
-//   try {
-//     const { id } = req.params;
+// DELETE - Delete quilt record
+app.delete('/api/quilts/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
 
-//     const db = client.db('quiltmachine');
-//     const collection = db.collection('quilts');
+    const db = client.db('quiltmachine');
+    const collection = db.collection('quilts');
 
-//     const result = await collection.deleteOne({ _id: new ObjectId(id) });
+    const result = await collection.deleteOne({ _id: new ObjectId(id) });
 
-//     if (result.deletedCount === 0) {
-//       return res.status(404).json({ error: 'Record not found' });
-//     }
+    if (result.deletedCount === 0) {
+      return res.status(404).json({ error: 'Record not found' });
+    }
 
-//     res.json({ message: 'Quilt deleted!' });
-//   } catch (error) {
-//     console.error('Error deleting quilt:', error);
-//     res.status(500).json({ error: 'Failed to delete quilt' });
-//   }
-// });
-
+    res.json({ message: 'Quilt deleted!' });
+  } catch (error) {
+    console.error('Error deleting quilt:', error);
+    res.status(500).json({ error: 'Failed to delete quilt' });
+  }
+});
+*/
 
 
 //start the server. 

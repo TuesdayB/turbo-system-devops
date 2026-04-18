@@ -30,4 +30,6 @@
 - Added admin panel
     - Only logged-in users with admin status can open the admin panel
 - Removed behind-the-scenes page
+- Implemented CREATE and READ for comics database (on Admin panel, not Comics HTML page. UPDATE and DELETE still in progess.)
+- Note to self: Add reset form button on page editor form, as well as some indicator when you're currently updating an existing page
 

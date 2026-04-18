@@ -24,57 +24,58 @@
     <button id="editComics">Post/Edit Comic Pages</button>
     <button id="editAnnouncements">Post/Edit Announcements</button>
   </div>
+  
+  <div id="mainContent">
+    <div class="row align-items-start">
+      <div class="col">
+        <div class="container-lg" id="comicFormDiv">
+          <form id="comicPageEditor">
+            <div class="form-group">
+              <label for="pageTitle">Page Title:</label>
+              <input type="text" id="pageTitle">
+            </div>
+            <div class="form-group">
+              <label for="pageIndex">Page Index:</label>
+              <input type="number" id="pageIndex" min="1">
+            </div>
+            <div class="form-group">
+              <label for="pageLink">Page Link:</label>
+              <input type="text" id="pageLink">
+            </div>
+            <button type="submit" id="comicPageSubmission">Publish Page</button>
+          </form>
+        </div>
+      </div>
+      <div class="col">
+        <div class="container-lg" id="comicPageList">
 
-  <div class="row align-items-start">
-    <div class="col">
-      <div class="container-lg" id="comicFormDiv">
-        <form id="comicPageEditor">
-          <div class="form-group">
-            <label for="pageTitle">Page Title:</label>
-            <input type="text" id="pageTitle">
-          </div>
-          <div class="form-group">
-            <label for="pageIndex">Page Index:</label>
-            <input type="number" id="pageIndex" min="1">
-          </div>
-          <div class="form-group">
-            <label for="pageLink">Page Link:</label>
-            <input type="text" id="pageLink">
-          </div>
-          <button type="submit" id="comicPageSubmission">Publish Page</button>
-        </form>
+        </div>
       </div>
     </div>
-    <div class="col">
-      <div class="container-lg" id="comicPageList">
 
+    <div class="row align-items-start">
+      <div class="col">
+        <div class="container-lg" id="announcementFormDiv">
+          <form id="announcementEditor">
+            <div class="form-group">
+              <label for="announcementTitle">Announcement Title:</label>
+              <input type="text" id="announcementTitle">
+            </div>
+            <div class="form-group">
+              <label for="announcementBody">Announcement Body:</label>
+              <textarea id="announcementBody" rows="10" cols="40"></textarea>
+            </div>
+            <button type="submit" id="announcementSubmission">Publish Announcement</button>
+          </form>
+        </div>
+      </div>
+      <div class="col">
+        <div class="container-lg" id="announcementList">
+
+        </div>
       </div>
     </div>
   </div>
-
-  <div class="row align-items-start">
-    <div class="col">
-      <div class="container-lg" id="announcementFormDiv">
-        <form id="announcementEditor">
-          <div class="form-group">
-            <label for="announcementTitle">Announcement Title:</label>
-            <input type="text" id="announcementTitle">
-          </div>
-          <div class="form-group">
-            <label for="announcementBody">Announcement Body:</label>
-            <textarea id="announcementBody" rows="10" cols="40"></textarea>
-          </div>
-          <button type="submit" id="announcementSubmission">Publish Announcement</button>
-        </form>
-      </div>
-    </div>
-    <div class="col">
-            <div class="container-lg" id="announcementList">
-
-      </div>
-    </div>
-  </div>
-
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
     integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI"
