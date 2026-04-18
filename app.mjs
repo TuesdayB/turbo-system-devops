@@ -65,14 +65,14 @@ app.get('/comic', (req, res) => {
 app.get('/announcements', (req, res) => {
   res.sendFile(join(__dirname, 'public', 'announcements.html'));
 })
-app.get('/behindthescenes', (req, res) => {
-  res.sendFile(join(__dirname, 'public', 'bts.html'));
-})
 app.get('/login', (req, res) => {
   res.sendFile(join(__dirname, 'public', 'login.html'));
 })
 app.get('/register', (req, res) => {
   res.sendFile(join(__dirname, 'public', 'registration.html'));
+})
+app.get('/admin', (req, res) => {
+  res.sendFile(join(__dirname, 'public', 'adminpanel.html'));
 })
 // app.get('/inject', (req, res) => {
 //   // Inject a server variable into barry.html: templating view like ejs or pug
@@ -181,7 +181,6 @@ function authenticateToken(req, res, next) {
 
   jwt.verify(token, JWT_SECRET, (err, user) => {
     if (err) {
-      // Token is invalid or expired
       return res.status(403).json({
         error: 'Invalid or expired token',
         message: 'Please log in again'
@@ -284,7 +283,7 @@ app.post('/api/auth/login', async (req, res) => {
 app.get('/api/auth/me', authenticateToken, async (req, res) => {
   try {
     console.log('User from token:', req.user);
-
+    const db = client.db('quiltmachine');
     const user = await db.collection('users').findOne(
       { _id: new ObjectId(req.user.userId) },
       { projection: { password: 0 } }

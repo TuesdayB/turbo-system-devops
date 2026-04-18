@@ -1,18 +1,25 @@
-# QuiltMachine **[New title/domain pending]**
+# Space Station 76
 ### Author: Tuesday Brown
 ### Project Purpose/Proposal
-This project will become a website for displaying a webcomic, which includes a home page, a 'comics' page (in which the comic itself can be read page-by-page), a behind-the-scenes page, an announcements page, and an admin panel for making announcements and uploading comics and concept art. 
+This project will is a website for displaying a webcomic, which includes:
+- A home page
+- A comics page in which the comic can be viewed page-by-page
+- An announcements page in which users can find news about the comic
+- An admin panel for publishing comic pages and announcements 
 
-Users will be able to leave likes and comments on each individual comic page. Users will also be able to add their email to a mailing list to get email notifications when a new comic page, announcement, or behind-the-scenes art piece is published.
+Users will be able to leave comments on each individual comic page. 
+Users will also be able to add their email to a mailing list to get email notifications when a new comic page or announcement is posted.
 
 ### Target Users
-The target audience should align with the comic's target audience, which would be likely be primarily teens and young adults that want to read a webcomic.
+As a webcomic artist, I want a place to publish my comic and news about it so that other people can read it.
+
 ### Links
 - [Repository](https://github.com/TuesdayB/turbo-system-devops)
 - [Render](https://turbo-system-devops.onrender.com/)
-- [Deployment](https://quiltmachine.barrycumbie.com)
+- [Deployment](https://spacestation76.barrycumbie.com)
 - [Milestones](https://github.com/TuesdayB/turbo-system-devops/milestones)
 - [Selected Boxes/Pathways](https://github.com/TuesdayB/turbo-system-devops/issues/5)
+
 ### Tech Stack
 - node.js
 - express.js
