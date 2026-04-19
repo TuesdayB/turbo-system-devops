@@ -2,13 +2,13 @@
 ### Author: Tuesday Brown
 ### Project Purpose/Proposal
 This project will is a website for displaying a webcomic, which includes:
-- A home page
-- A comics page in which the comic can be viewed page-by-page
-- An announcements page in which users can find news about the comic
-- An admin panel for publishing comic pages and announcements 
+- [x] A home page
+- [x] A comics page in which the comic can be viewed page-by-page
+- [x] An announcements page in which users can find news about the comic
+- [x] An admin panel for publishing comic pages and announcements 
 
-Users will be able to leave comments on each individual comic page. 
-Users will also be able to add their email to a mailing list to get email notifications when a new comic page or announcement is posted.
+- [x] Users will be able to leave comments on each individual comic page. 
+- [] Users will also be able to add their email to a mailing list to get email notifications when a new comic page or announcement is posted.
 
 ### Target Users
 As a webcomic artist, I want a place to publish my comic and news about it so that other people can read it.
@@ -21,14 +21,16 @@ As a webcomic artist, I want a place to publish my comic and news about it so th
 - [Selected Boxes/Pathways](https://github.com/TuesdayB/turbo-system-devops/issues/5)
 
 ### Tech Stack
-- node.js
-- express.js
-- MongoDB
-- RESTful API
-- nodemon
-- dotenv
-- Render
-- normalize.css
-- Bootstrap 5
-- .yaml
-- GCP
+- Code
+    - node.js
+    - express.js
+    - RESTful API
+    - nodemon
+    - normalize.css
+    - Bootstrap 5
+    - MongoDB
+- Server
+    - dotenv
+    - Render
+    - .yaml
+    - GCP
