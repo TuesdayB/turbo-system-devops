@@ -32,4 +32,6 @@
 - Removed behind-the-scenes page
 - Implemented CREATE and READ for comics database (on Admin panel, not Comics HTML page. UPDATE and DELETE still in progess.)
 - Note to self: Add reset form button on page editor form, as well as some indicator when you're currently updating an existing page
-
+### 4/18
+- Implemented UPDATE and DELETE for comic pages
+- Added toggle buttons for viewing announcement and comic editors

@@ -24,9 +24,9 @@
     <button id="editComics">Post/Edit Comic Pages</button>
     <button id="editAnnouncements">Post/Edit Announcements</button>
   </div>
-  
+
   <div id="mainContent">
-    <div class="row align-items-start">
+    <div class="row align-items-start" id="comicsContainers" hidden>
       <div class="col">
         <div class="container-lg" id="comicFormDiv">
           <form id="comicPageEditor">
@@ -43,6 +43,8 @@
               <input type="text" id="pageLink">
             </div>
             <button type="submit" id="comicPageSubmission">Publish Page</button>
+            <button id="resetComicForm" type="button" onclick="resetForm('comicPageEditor')">Reset Form</button>
+            <button id="loadComicList" type="button" onclick="loadPages()">Refresh Comic Pages</button>
           </form>
         </div>
       </div>
@@ -53,7 +55,7 @@
       </div>
     </div>
 
-    <div class="row align-items-start">
+    <div class="row align-items-start" id="announcementsContainers" hidden>
       <div class="col">
         <div class="container-lg" id="announcementFormDiv">
           <form id="announcementEditor">
@@ -63,7 +65,7 @@
             </div>
             <div class="form-group">
               <label for="announcementBody">Announcement Body:</label>
-              <textarea id="announcementBody" rows="10" cols="40"></textarea>
+              <textarea id="announcementBody" rows="8" cols="30"></textarea>
             </div>
             <button type="submit" id="announcementSubmission">Publish Announcement</button>
           </form>

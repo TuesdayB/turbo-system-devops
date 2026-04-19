@@ -4,11 +4,11 @@ body {
   background-image: url('https://external-content.duckduckgo.com/iu/?u=http%3A%2F%2Fwww.imageafter.com%2Fdbase%2Ftextures%2Fmetals%2Fb19metals023.jpg&f=1&nofb=1&ipt=c7b9f6618e954a2d1c795ac0167e64fbcd6dee62cb150fb379066f12f24257fb');
 }
 
-.container-lg {
+.container-lg, .container-md, .container-sm {
   background: white;
   padding: 20px;
   border-radius: 8px;
-  margin-bottom: 20px;
+  margin-top: 20px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
@@ -101,26 +101,17 @@ button:hover {
   background: #426dc3;
 }
 
-/* .footer a {
-  color: #f2bfff;
-  text-decoration: none;
-  font-size: 0.8rem;
+#comicPageList, #comicFormDiv {
+  max-height: 345px;
+  min-height: 345px;
+  overflow-y: auto;
 }
 
-.footer a:hover {
-  color: #9d43b4;
+#announcementList, #announcementFormDiv {
+  max-height: 500px;
+  min-height: 500x;
+  overflow-y: auto;
 }
-
-.footer span {
-  color: #ffffff;
-  font-size: 0.8rem;
-}
-
-.wrapper {
-  padding: 20px;
-  margin: 15px 0;
-  background-color: #0f9d58;
-} */
 
 textarea {
   font-size: 20px;

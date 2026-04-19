@@ -57,8 +57,40 @@ function checkAuthentication() {
     }
 }
 
+function resetForm(formID) {
+    let editingId = null;
+    document.getElementById('comicPageSubmission').innerHTML = "Publish Page";
+    document.getElementById(formID).reset();
+}
 
-//CREATE - New comic
+// Fill update form
+function fillComicUpdateForm(id, title, index, pageLink) {
+    editingId = id;
+    document.getElementById('pageTitle').value = title;
+    document.getElementById('pageIndex').value = index;
+    document.getElementById('pageLink').value = pageLink;
+    showMessage('📝 Comic data loaded in update form', 'info');
+}
+
+document.getElementById('editComics').addEventListener('click', (e) =>{
+comicsContainers = document.getElementById('comicsContainers');
+comicsContainers.hidden = false;
+announcementsContainers = document.getElementById('announcementsContainers');
+announcementsContainers.hidden = true;
+let editingId = null;
+
+});
+
+document.getElementById('editAnnouncements').addEventListener('click', (e) =>{
+comicsContainers = document.getElementById('comicsContainers');
+comicsContainers.hidden = true;
+announcementsContainers = document.getElementById('announcementsContainers');
+announcementsContainers.hidden = false;
+let editingId = null;
+
+});
+
+//CREATE/UPDATE - New comic or Edit existing comic
 document.getElementById('comicPageEditor').addEventListener('submit', async (e) => {
     e.preventDefault();
 
@@ -74,32 +106,54 @@ document.getElementById('comicPageEditor').addEventListener('submit', async (e) 
         pageLink: document.getElementById('pageLink').value
     };
 
-    try {
-        const response = await fetch('/api/comics', {
-            method: 'POST',
-            headers: headers,
-            body: JSON.stringify(comic)
-        });
+    if (editingId) {
+        const id = editingId;
+        try {
+            const response = await fetch(`/api/comics/${id}`, {
+                method: 'PUT',
+                headers: headers,
+                body: JSON.stringify(comic)
+            });
 
-        const result = await response.json();
+            const result = await response.json();
 
-        if (response.ok) {
-            showMessage(`✅ Student "${comic.title}" added successfully!`, 'success');
-            document.getElementById('comicPageEditor').reset();
-            // loadStudents(); // Refresh the list
-        } else {
-            if (response.status === 401 || response.status === 403) {
-                showMessage('❌ Authentication failed. Please login again.', 'danger');
-                logout();
+            if (response.ok) {
+                showMessage(`✅ Comic "${comic.title}" updated successfully!`, 'success');
+                resetForm('comicPageEditor');
+                loadPages();
             } else {
                 showMessage(`❌ Error: ${result.error}`, 'danger');
             }
+        } catch (error) {
+            showMessage(`❌ Network error: ${error.message}`, 'danger');
         }
-    } catch (error) {
-        showMessage(`❌ Network error: ${error.message}`, 'danger');
+    } else {
+        try {
+            const response = await fetch('/api/comics', {
+                method: 'POST',
+                headers: headers,
+                body: JSON.stringify(comic)
+            });
+
+            const result = await response.json();
+
+            if (response.ok) {
+                showMessage(`✅ Student "${comic.title}" added successfully!`, 'success');
+                resetForm('comicPageEditor');
+                loadPages();
+            } else {
+                if (response.status === 401 || response.status === 403) {
+                    showMessage('❌ Authentication failed. Please login again.', 'danger');
+                    logout();
+                } else {
+                    showMessage(`❌ Error: ${result.error}`, 'danger');
+                }
+            }
+        } catch (error) {
+            showMessage(`❌ Network error: ${error.message}`, 'danger');
+        }
     }
 });
-
 
 // READ - Load all pages
 async function loadPages() {
@@ -136,18 +190,17 @@ async function loadPages() {
                     <div>
                         <strong>${comic.title}</strong> (Page # ${comic.index})
                         <br>
-                        <small class="text-muted">ID: <span class="comic-id" 
+                        <small class="text-muted"><b>ID: <span class="comic-id" 
                             data-id="${comic._id}" 
                             data-title="${comic.title}" 
                             data-index="${comic.index}" 
-                            data-link="${comic.pageLink}">${comic._id}</span></small>
+                            data-link="${comic.pageLink}">${comic._id}</span></b></small>
                         <br><small class="text-muted">Link: <a href='${comic.pageLink}' target='_blank'>${comic.pageLink}</a></small>
                         ${comic.postedBy ? `<br><small class="text-muted">Created by: ${comic.postedBy}</small>` : ''}
                     </div>
-                    <button class="btn btn-outline-danger btn-sm" 
+                    <button class="btn btn-danger btn-sm delete-btn" 
                         data-comic-id="${comic._id}" 
-                        data-comic-title="${comic.title}"
-                        class="delete-btn">
+                        data-comic-title="${comic.title}">
                         🗑️ Delete
                     </button>
                 </div>
@@ -161,18 +214,19 @@ async function loadPages() {
                 const title = this.getAttribute('data-title');
                 const index = this.getAttribute('data-index');
                 const pageLink = this.getAttribute('data-link');
+                document.getElementById('comicPageSubmission').innerHTML = "Edit Page";
                 fillComicUpdateForm(id, title, index, pageLink);
             });
         });
 
-        //         // Add click event listeners for delete buttons
-        //         document.querySelectorAll('.delete-btn').forEach(button => {
-        //             button.addEventListener('click', function() {
-        //                 const id = this.getAttribute('data-student-id');
-        //                 const name = this.getAttribute('data-student-name');
-        //                 deleteStudent(id, name);
-        //             });
-        //         });
+        // Add click event listeners for delete buttons
+        document.querySelectorAll('.delete-btn').forEach(button => {
+            button.addEventListener('click', function () {
+                const id = this.getAttribute('data-comic-id');
+                const title = this.getAttribute('data-comic-title');
+                deletePage(id, title);
+            });
+        });
 
         showMessage(`📋 Loaded ${comics.length} comics`, 'info');
     } catch (error) {
@@ -180,131 +234,38 @@ async function loadPages() {
     }
 }
 
-// Fill update form when clicking on student ID
-function fillComicUpdateForm(id, title, index, pageLink) {
-    editingId = id;
-    document.getElementById('pageTitle').value = title;
-    document.getElementById('pageIndex').value = index;
-    document.getElementById('pageLink').value = pageLink;
-    showMessage('📝 Comic data loaded in update form', 'info');
+// DELETE - Delete comic page
+async function deletePage(id, title) {
+    console.log('delete');
+    if (!confirm(`Are you sure you want to delete "${title}"?`)) {
+        return;
+    }
+    const headers = getAuthHeaders();
+    if (!headers) {
+        showMessage('❌ Authentication required. Please login first.', 'danger');
+        return;
+    }
+    try {
+        const response = await fetch(`/api/comics/${id}`, {
+            method: 'DELETE',
+            headers: headers
+        });
+
+        const result = await response.json();
+        console.log(JSON.stringify(result));
+
+        if (response.ok) {
+            showMessage(`✅ Comic "${name}" deleted successfully!`, 'success');
+            loadPages(); // Refresh the list
+        } else {
+            showMessage(`❌ Error: ${result.error}`, 'danger');
+        }
+    } catch (error) {
+        showMessage(`❌ Network error: ${error.message}`, 'danger');
+    }
 }
 
+
+//Initialize Page
 let editingId = null;
 loadPages();
-
-
-
-
-/*
-    let editingId = null;
-
-    // Handle form submission
-    document.getElementById('quiltForm').addEventListener('submit', async (e) => {
-      e.preventDefault();
-
-      const quiltName = document.getElementById('quiltName').value;
-      const quiltWidth = document.getElementById('quiltWidth').value;
-      const quiltHeight = document.getElementById('quiltHeight').value;
-      const squareSize = document.getElementById('squareSize').value;
-
-      try {
-        const url = editingId ? `/api/quilts/${editingId}` : '/api/quilts';
-        const method = editingId ? 'PUT' : 'POST';
-
-        const response = await fetch(url, {
-          method: method,
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            quiltName,
-            quiltWidth,
-            quiltHeight,
-            squareSize
-          })
-        });
-
-        const result = await response.json();
-
-        if (response.ok) {
-          showMessage(result.message, 'success');
-          document.getElementById('quiltForm').reset();
-          if (editingId) {
-            editingId = null;
-            document.querySelector('button[type="submit"]').textContent = 'Save Quilt';
-          }
-          loadQuilts();
-        } else {
-          showMessage(result.error, 'error');
-        }
-      } catch (error) {
-        showMessage('Error submitting form', 'error');
-      }
-    });
-
-    // Load quilt records
-    async function loadQuilts() {
-      try {
-        const response = await fetch('/api/quilts');
-        const records = await response.json();
-
-        const listDiv = document.getElementById('quiltList');
-
-        if (records.length === 0) {
-          listDiv.innerHTML = '<p>No quilt records yet.</p>';
-          return;
-        }
-
-        listDiv.innerHTML = records.map(record => `
-          <div class="record">
-            <strong>${record.quiltName}</strong><br>
-            <small>Dimensions: ${record.quiltWidth} x ${record.quiltHeight} | Recorded: ${new Date(record.timestamp).toLocaleString()}</small><br>
-            <button class="edit-btn" onclick="editRecord('${record._id}', '${record.quiltName}', '${record.quiltWidth}', '${record.quiltHeight}','${record.squareSize}')">Edit</button>
-            <button class="delete-btn" onclick="deleteRecord('${record._id}')">Delete</button>
-          </div>
-        `).join('');
-      } catch (error) {
-        document.getElementById('quiltList').innerHTML = 'Error loading quilt records';
-      }
-    }
-
-    // Edit record
-    function editRecord(id, quiltName, quiltWidth, quiltHeight, squareSize) {
-      editingId = id;
-      document.getElementById('quiltName').value = quiltName;
-      document.getElementById('quiltWidth').value = quiltWidth;
-      document.getElementById('quiltHeight').value = quiltHeight;
-      document.getElementById('squareSize').value = squareSize;
-      document.querySelector('button[type="submit"]').textContent = 'Update Quilt';
-      showMessage('Editing record - click Update to save changes', 'success');
-    }
-
-    // Delete record
-    async function deleteRecord(id) {
-      if (!confirm('Are you sure you want to delete this record?')) return;
-
-      try {
-        const response = await fetch(`/api/quilts/${id}`, {
-          method: 'DELETE'
-        });
-
-        const result = await response.json();
-
-        if (response.ok) {
-          showMessage(result.message, 'success');
-          loadQuilts();
-        } else {
-          showMessage(result.error, 'error');
-        }
-      } catch (error) {
-        showMessage('Error deleting record', 'error');
-      }
-    }
-
-    // Initialize page
-    loadDesmosInfo();
-    loadQuilts();
-
-    // Set today's date as default
-    document.getElementById('date').value = 'February 30, 2026';
-    */
