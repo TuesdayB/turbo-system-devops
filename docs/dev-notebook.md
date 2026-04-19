@@ -37,3 +37,6 @@
 - Added toggle buttons for viewing announcement and comic editors
 - Added announcements CRUD
 - Added comic view page
+### 4/19
+- Added comments CRUD
+- Cosmetic adjustments
