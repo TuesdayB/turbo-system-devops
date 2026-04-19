@@ -29,8 +29,12 @@ As a webcomic artist, I want a place to publish my comic and news about it so th
     - normalize.css
     - Bootstrap 5
     - MongoDB
+    - nodemailer
 - Server
     - dotenv
     - Render
     - .yaml
     - GCP
+
+ ### Problem-Solving
+ - [MIME Type Mismatch Error](https://github.com/TuesdayB/turbo-system-devops/wiki/MIME-Type-Mismatch-Error)
