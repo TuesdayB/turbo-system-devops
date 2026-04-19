@@ -390,6 +390,106 @@ app.delete('/api/comics/:id', authenticateToken, async (req, res) => {
 });
 
 //CRUD Operations: Announcements
+//CREATE - New announcements
+app.post('/api/announcements', authenticateToken, async (req, res) => {
+  try {
+    const { title, bodyText } = req.body;
+
+    // Simple validation
+    if (!title || !bodyText) {
+      return res.status(400).json({ error: 'Title and body text are both required' });
+    }
+
+    const announcement = {
+      title,
+      bodyText,
+      postedBy: req.user.username,
+      postedAt: new Date()
+    }
+
+    const result = await db.collection('announcements').insertOne(announcement);
+    console.log(`✅ Announcement published by ${req.user.username}: ${title}`);
+
+    res.status(201).json({
+      message: 'Announcement created successfully',
+      announcementId: result.insertedId,
+      announcement: { ...announcement, _id: result.insertedId }
+    });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to create announcement: ' + error.message });
+  }
+});
+
+// READ - Get all announcements (PROTECTED)
+app.get('/api/announcements', authenticateToken, async (req, res) => {
+  try {
+    const announcements = await db.collection('announcements').find({}).toArray();
+    console.log(`📋 ${req.user.username} viewed ${announcements.length} announcements`);
+    res.json(announcements);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to fetch announcements: ' + error.message });
+  }
+});
+
+// UPDATE - Update an announcement by ID (PROTECTED)
+app.put('/api/announcements/:id', authenticateToken, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { title, bodyText } = req.body;
+
+    if (!ObjectId.isValid(id)) {
+      return res.status(400).json({ error: 'Invalid announcement ID' });
+    }
+
+    const updateData = { updatedBy: req.user.username, updatedAt: new Date() };
+    if (title) updateData.title = title;
+    if (bodyText) updateData.bodyText = bodyText;
+
+    const result = await db.collection('announcements').updateOne(
+      { _id: new ObjectId(id) },
+      { $set: updateData }
+    );
+    if (result.matchedCount === 0) {
+      return res.status(404).json({ error: 'Announcement not found' });
+    }
+
+    console.log(`✏️ Announcement updated by ${req.user.username}: ${id}`);
+
+    res.json({
+      message: 'Announcement updated successfully',
+      modifiedCount: result.modifiedCount
+    });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to update announcement: ' + error.message });
+  }
+});
+
+// DELETE - Delete an announcement by ID (PROTECTED)
+app.delete('/api/announcements/:id', authenticateToken, async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // Validate ObjectId
+    if (!ObjectId.isValid(id)) {
+      return res.status(400).json({ error: 'Invalid announcement ID' });
+    }
+
+    const result = await db.collection('announcements').deleteOne({ _id: new ObjectId(id) });
+
+    if (result.deletedCount === 0) {
+      return res.status(404).json({ error: 'Announcement not found' });
+    }
+
+    console.log(`🗑️ Announcement deleted by ${req.user.username}: ${id}`);
+
+    res.json({
+      message: 'Announcement deleted successfully',
+      deletedCount: result.deletedCount
+    });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to delete announcement: ' + error.message });
+  }
+});
 
 //CRUD Operations: Comments
 
