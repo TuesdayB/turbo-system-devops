@@ -179,6 +179,12 @@ function authenticateToken(req, res, next) {
   });
 }
 
+function parseISODate(ISODate) {
+  const dateObject = new Date(ISODate);
+  let text = dateObject.toLocaleString();
+  return text;
+}
+
 app.post('/api/auth/register', async (req, res) => {
   try {
     const { username, password, confirmPassword } = req.body;
@@ -289,7 +295,7 @@ app.post('/api/comics', authenticateToken, async (req, res) => {
     if (!title || !index || !pageLink) {
       return res.status(400).json({ error: 'Title, page index, and page link are all required' });
     }
-    
+
     const existingPageIndex = await db.collection('comics').findOne({ index });
     if (existingPageIndex) {
       return res.status(400).json({ error: `Page ${index} already exists` });
@@ -334,8 +340,12 @@ app.get('/api/comics/:index', async (req, res) => {
 
     const comicPage = await db.collection('comics').findOne({ index: parseInt(index) });
     const pageCount = await db.collection('comics').countDocuments({});
+
+    const readableDate = parseISODate(comicPage.postedAt);
+
+    comicPage.readableDate = readableDate;
     comicPage.totalPages = pageCount;
-    console.log(comicPage.totalPages);
+
     res.json(comicPage);
   } catch (error) {
     res.status(500).json({ error: 'Failed to fetch comic: ' + error.message });
@@ -438,7 +448,8 @@ app.post('/api/announcements', authenticateToken, async (req, res) => {
 // READ - Get all announcements
 app.get('/api/announcements', async (req, res) => {
   try {
-    const announcements = await db.collection('announcements').find({}).toArray();
+    const announcements = await db.collection('announcements').find({}).sort({ postedAt: -1 }).toArray();
+
     res.json(announcements);
   } catch (error) {
     res.status(500).json({ error: 'Failed to fetch announcements: ' + error.message });
@@ -506,6 +517,108 @@ app.delete('/api/announcements/:id', authenticateToken, async (req, res) => {
 });
 
 //CRUD Operations: Comments
+// CREATE - Create comment
+app.post('/api/comments', authenticateToken, async (req, res) => {
+try {
+    const { pageId, commentBody } = req.body;
+
+    // Simple validation
+    if (!commentBody) {
+      return res.status(400).json({ error: 'Comment body required' });
+    }
+
+    const comment = {
+      pageId,
+      commentBody,
+      postedBy: req.user.username,
+      postedAt: new Date()
+    }
+
+    const result = await db.collection('comments').insertOne(comment);
+    console.log(`✅ Comment published by ${req.user.username}: ${commentBody}`);
+
+    res.status(201).json({
+      message: 'Comment created successfully',
+      commentId: result.insertedId,
+      comment: { ...comment, _id: result.insertedId }
+    });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to create comment: ' + error.message });
+  }
+
+});
+
+//READ - Get a page's comments
+app.get('/api/comments/:pageId', async (req, res) => {
+  try {
+    const { pageId } = req.params;
+
+    const pageComments = await db.collection('comments').find({ pageId: pageId }).toArray();
+
+    res.json(pageComments);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to fetch comic: ' + error.message });
+  }
+});
+
+// UPDATE - Update a comment by ID (PROTECTED)
+app.put('/api/comments/:id', authenticateToken, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { commentBody } = req.body;
+
+    if (!ObjectId.isValid(id)) {
+      return res.status(400).json({ error: 'Invalid comment ID' });
+    }
+
+    const updateData = { updatedAt: new Date() };
+    if(commentBody) updateData.commentBody = commentBody;
+
+    const result = await db.collection('comments').updateOne(
+      { _id: new ObjectId(id) },
+      { $set: updateData }
+    );
+    if (result.matchedCount === 0) {
+      return res.status(404).json({ error: 'Comment not found' });
+    }
+
+    console.log(`✏️ Comment updated by ${req.user.username}: ${id}`);
+
+    res.json({
+      message: 'Comment updated successfully',
+      modifiedCount: result.modifiedCount
+    });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to update comment: ' + error.message });
+  }
+});
+
+// DELETE - Delete a comment by ID (PROTECTED)
+app.delete('/api/comments/:id', authenticateToken, async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // Validate ObjectId
+    if (!ObjectId.isValid(id)) {
+      return res.status(400).json({ error: 'Invalid comment ID' });
+    }
+
+    const result = await db.collection('comments').deleteOne({ _id: new ObjectId(id) });
+
+    if (result.deletedCount === 0) {
+      return res.status(404).json({ error: 'Comment not found' });
+    }
+
+    console.log(`🗑️ Comment deleted by ${req.user.username}: ${id}`);
+
+    res.json({
+      message: 'Comment deleted successfully',
+      deletedCount: result.deletedCount
+    });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to delete comment: ' + error.message });
+  }
+});
 
 //start the server. 
 app.listen(3000, () => {

@@ -1,4 +1,5 @@
-//checks if already logged in, if so, redirects
+hasAdmin=false;
+//checks if not logged in, if so, redirects
 window.addEventListener('load', async (e) => {
     e.preventDefault();
 
@@ -370,7 +371,7 @@ async function loadAnnouncements() {
             </div>
         `).join('');
 
-        // Add click event listeners for student IDs
+        // Add click event listeners for announcement IDs
         document.querySelectorAll('.announcement-id').forEach(span => {
             span.addEventListener('click', function () {
                 const id = this.getAttribute('data-id');
