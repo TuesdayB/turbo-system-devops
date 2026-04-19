@@ -35,3 +35,5 @@
 ### 4/18
 - Implemented UPDATE and DELETE for comic pages
 - Added toggle buttons for viewing announcement and comic editors
+- Added announcements CRUD
+- Added comic view page

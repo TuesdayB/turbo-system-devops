@@ -101,6 +101,12 @@ button:hover {
   background: #426dc3;
 }
 
+.comicPageDisplay{
+  width: 100%;
+  height: 100%;
+  padding: 5px;
+}
+
 #comicPageList, #comicFormDiv {
   max-height: 345px;
   min-height: 345px;

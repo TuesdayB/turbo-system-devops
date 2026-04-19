@@ -33,7 +33,6 @@ async function checkAdminStatus() {
 
     if (response.ok) {
       hasAdmin = result.user.hasAdmin;
-      console.log(hasAdmin);
       if(hasAdmin){
         adminLink.removeAttribute("hidden");
       }

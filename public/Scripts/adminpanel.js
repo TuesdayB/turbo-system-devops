@@ -45,9 +45,7 @@ function getAuthHeaders() {
 function checkAuthentication() {
     const token = localStorage.getItem('jwtToken');
     const username = localStorage.getItem('username');
-    // const authStatus = document.getElementById('authStatus');
-    // const mainContent = document.getElementById('mainContent');
-
+    
     if (!token) {
         mainContent.style.display = 'none';
         return false;
@@ -79,22 +77,20 @@ function fillAnnouncementUpdateForm(id, title, bodyText) {
     showMessage('📝 Announcement data loaded in update form', 'info');
 }
 
-document.getElementById('editComics').addEventListener('click', (e) =>{
-comicsContainers = document.getElementById('comicsContainers');
-comicsContainers.hidden = false;
-announcementsContainers = document.getElementById('announcementsContainers');
-announcementsContainers.hidden = true;
-let editingId = null;
-
+document.getElementById('editComics').addEventListener('click', (e) => {
+    comicsContainers = document.getElementById('comicsContainers');
+    comicsContainers.hidden = false;
+    announcementsContainers = document.getElementById('announcementsContainers');
+    announcementsContainers.hidden = true;
+    let editingId = null;
 });
 
-document.getElementById('editAnnouncements').addEventListener('click', (e) =>{
-comicsContainers = document.getElementById('comicsContainers');
-comicsContainers.hidden = true;
-announcementsContainers = document.getElementById('announcementsContainers');
-announcementsContainers.hidden = false;
-let editingId = null;
-loadAnnouncements();
+document.getElementById('editAnnouncements').addEventListener('click', (e) => {
+    comicsContainers = document.getElementById('comicsContainers');
+    comicsContainers.hidden = true;
+    announcementsContainers = document.getElementById('announcementsContainers');
+    announcementsContainers.hidden = false;
+    let editingId = null;
 });
 
 //CREATE/UPDATE - New comic or Edit existing comic
@@ -164,26 +160,16 @@ document.getElementById('comicPageEditor').addEventListener('submit', async (e) 
 
 // READ - Load all pages
 async function loadPages() {
-    const headers = getAuthHeaders();
-    if (!headers) {
-        showMessage('❌ Authentication required. Please login first.', 'danger');
-        return;
-    }
-
     try {
-        const response = await fetch('/api/comics', {
+        const response = await fetch(`/api/comics`, {
             method: 'GET',
-            headers: headers
+            headers: {
+                'Content-Type': 'application/json'
+            }
         });
 
-        if (response.status === 401 || response.status === 403) {
-            showMessage('❌ Authentication failed. Please login again.', 'danger');
-            logout();
-            return;
-        }
-
         const comics = await response.json();
-
+        console.log(JSON.stringify(comics));
         const comicPageList = document.getElementById('comicPageList');
 
         if (comics.length === 0) {
@@ -339,16 +325,12 @@ document.getElementById('announcementEditor').addEventListener('submit', async (
 
 // READ - Load all announcements
 async function loadAnnouncements() {
-    const headers = getAuthHeaders();
-    if (!headers) {
-        showMessage('❌ Authentication required. Please login first.', 'danger');
-        return;
-    }
-
     try {
         const response = await fetch('/api/announcements', {
             method: 'GET',
-            headers: headers
+            headers: {
+                'Content-Type': 'application/json'
+            }
         });
 
         if (response.status === 401 || response.status === 403) {

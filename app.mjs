@@ -316,14 +316,29 @@ app.post('/api/comics', authenticateToken, async (req, res) => {
   }
 });
 
-// READ - Get all pages (PROTECTED)
-app.get('/api/comics', authenticateToken, async (req, res) => {
+// READ - Get all pages
+app.get('/api/comics', async (req, res) => {
   try {
-    const comics = await db.collection('comics').find({}).toArray();
-    console.log(`📋 ${req.user.username} viewed ${comics.length} comics`);
+    const comics = await db.collection('comics').find({}).sort({ index: 1 }).toArray();
+
     res.json(comics); // Return just the array for frontend simplicity
   } catch (error) {
     res.status(500).json({ error: 'Failed to fetch comics: ' + error.message });
+  }
+});
+
+//READ - Get a single page
+app.get('/api/comics/:index', async (req, res) => {
+  try {
+    const { index } = req.params;
+
+    const comicPage = await db.collection('comics').findOne({ index: parseInt(index) });
+    const pageCount = await db.collection('comics').countDocuments({});
+    comicPage.totalPages = pageCount;
+    console.log(comicPage.totalPages);
+    res.json(comicPage);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to fetch comic: ' + error.message });
   }
 });
 
@@ -390,7 +405,7 @@ app.delete('/api/comics/:id', authenticateToken, async (req, res) => {
 });
 
 //CRUD Operations: Announcements
-//CREATE - New announcements
+//CREATE - New announcement
 app.post('/api/announcements', authenticateToken, async (req, res) => {
   try {
     const { title, bodyText } = req.body;
@@ -420,11 +435,10 @@ app.post('/api/announcements', authenticateToken, async (req, res) => {
   }
 });
 
-// READ - Get all announcements (PROTECTED)
-app.get('/api/announcements', authenticateToken, async (req, res) => {
+// READ - Get all announcements
+app.get('/api/announcements', async (req, res) => {
   try {
     const announcements = await db.collection('announcements').find({}).toArray();
-    console.log(`📋 ${req.user.username} viewed ${announcements.length} announcements`);
     res.json(announcements);
   } catch (error) {
     res.status(500).json({ error: 'Failed to fetch announcements: ' + error.message });
