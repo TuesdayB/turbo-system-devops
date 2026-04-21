@@ -60,18 +60,6 @@ app.get('/register', (req, res) => {
 app.get('/admin', (req, res) => {
   res.sendFile(join(__dirname, 'public', 'adminpanel.html'));
 })
-// app.get('/inject', (req, res) => {
-//   // Inject a server variable into barry.html: templating view like ejs or pug
-//   readFile(join(__dirname, 'public', 'index.html'), 'utf8')
-//     .then(html => {
-//       // Replace a placeholder in the HTML (e.g., {{myVar}})
-//       const injectedHtml = html.replace('{{myVar}}', myVar);
-//       res.send(injectedHtml);
-//     })
-//     .catch(err => {
-//       res.status(500).send('Error loading page');
-//     });
-// })
 
 // API Health/Endpoints Documentation
 app.get('/api/health', (req, res) => {
@@ -93,8 +81,8 @@ app.get('/api/health', (req, res) => {
     },
     {
       method: 'GET',
-      path: '/behindthescenes',
-      description: 'Serve behind-the-scenes HTML page'
+      path: '/admin',
+      description: 'Serve admin panel HTML page'
     },
     {
       method: 'GET',
@@ -114,35 +102,130 @@ app.get('/api/health', (req, res) => {
     },
     {
       method: 'POST',
-      path: '/api/quilts',
-      description: 'CREATE - Add new quilt record',
+      path: '/api/auth/register',
+      description: 'CREATE - Add new user',
       bodyExample: {
-        "quiltName": "testquilt",
-        "quiltWidth": 5,
-        "quiltHeight": 6,
-        "squareSize": 10
+        "username": "testuser",
+        "password": hashedPassword,
+        "dateCreated": ISODate,
+        "hasAdmin": false
+      }
+    },
+    {
+      method: 'POST',
+      path: '/api/auth/login',
+      description: 'User log-in',
+      tokenExample: {
+        "userId": id,
+        "username": "testuser",
       }
     },
     {
       method: 'GET',
-      path: '/api/quilts',
-      description: 'READ - Get all quilt records'
+      path: '/api/auth/me',
+      description: 'READ - Get user information from db'
+    },
+    {
+      method: 'POST',
+      path: '/api/comics',
+      description: 'CREATE - New comic page',
+      bodyExample: {
+        "title": "Page 1",
+        "index": 1,
+        "pageLink": "https://image.com/img.png",
+        "postedBy": "testuser",
+        "postedAt": ISODate
+      }
+    },
+    {
+      method: 'GET',
+      path: '/api/comics',
+      description: 'READ - Get all pages'
+    },
+    {
+      method: 'GET',
+      path: '/api/comics/:id',
+      description: 'READ - Get a single page'
     },
     {
       method: 'PUT',
-      path: '/api/quilts/:id',
-      description: 'UPDATE - Update existing quilt record',
+      path: '/api/comics/:id',
+      description: 'UPDATE - Update existing comic page by id',
       bodyExample: {
-        "quiltName": "testquilt",
-        "quiltWidth": 6,
-        "quiltHeight": 5,
-        "squareSize": 8
+        "title": "Page 1",
+        "index": 1,
+        "pageLink": "https://image.com/img.png",
+        "postedBy": "testuser",
+        "postedAt": ISODate
       }
     },
     {
       method: 'DELETE',
-      path: '/api/quilts/:id',
-      description: 'DELETE - Remove quilt record'
+      path: '/api/comics/:id',
+      description: 'DELETE - Remove comic'
+    },
+    {
+      method: 'POST',
+      path: '/api/announcements',
+      description: 'CREATE - New announcement',
+      bodyExample: {
+        "title": "Announcement",
+        "bodyText": "this is an announcement",
+        "postedBy": "testuser",
+        "postedAt": ISODate
+      }
+    },
+    {
+      method: 'GET',
+      path: '/api/announcements',
+      description: 'READ - Get all announcements'
+    },
+    {
+      method: 'PUT',
+      path: '/api/announcements/:id',
+      description: 'UPDATE - Update existing announcement by id',
+      bodyExample: {
+        "title": "Announcement",
+        "bodyText": "this is an announcement",
+        "postedBy": "testuser",
+        "postedAt": ISODate
+      }
+    },
+    {
+      method: 'DELETE',
+      path: '/api/announcements/:id',
+      description: 'DELETE - Remove announcement'
+    },
+    {
+      method: 'POST',
+      path: '/api/comments',
+      description: 'CREATE - New comment',
+      bodyExample: {
+        "pageId": comicpageid,
+        "bodyText": "this is a comment",
+        "postedBy": "testuser",
+        "postedAt": ISODate
+      }
+    },
+    {
+      method: 'GET',
+      path: '/api/comments/:pageId',
+      description: 'READ - Get all comments on a page'
+    },
+    {
+      method: 'PUT',
+      path: '/api/comments/:id',
+      description: 'UPDATE - Update existing comment by id',
+      bodyExample: {
+        "bodyText": "this is a comment",
+        "postedBy": "testuser",
+        "postedAt": ISODate
+      }
+    },
+    {
+      method: 'DELETE',
+      path: '/api/comments/:id',
+      description: 'DELETE - Remove comment'
     }
   ];
 
@@ -185,6 +268,7 @@ function parseISODate(ISODate) {
   return text;
 }
 
+//CREATE - Add new user
 app.post('/api/auth/register', async (req, res) => {
   try {
     const { username, password, confirmPassword } = req.body;
@@ -230,6 +314,7 @@ app.post('/api/auth/register', async (req, res) => {
   }
 });
 
+//User log-in
 app.post('/api/auth/login', async (req, res) => {
   try {
     const { username, password } = req.body;
@@ -519,7 +604,7 @@ app.delete('/api/announcements/:id', authenticateToken, async (req, res) => {
 //CRUD Operations: Comments
 // CREATE - Create comment
 app.post('/api/comments', authenticateToken, async (req, res) => {
-try {
+  try {
     const { pageId, commentBody } = req.body;
 
     // Simple validation
@@ -572,7 +657,7 @@ app.put('/api/comments/:id', authenticateToken, async (req, res) => {
     }
 
     const updateData = { updatedAt: new Date() };
-    if(commentBody) updateData.commentBody = commentBody;
+    if (commentBody) updateData.commentBody = commentBody;
 
     const result = await db.collection('comments').updateOne(
       { _id: new ObjectId(id) },

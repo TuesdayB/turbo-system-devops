@@ -40,3 +40,5 @@
 ### 4/19
 - Added comments CRUD
 - Cosmetic adjustments
+### 4/21
+- Fixed API endpoints health documentation
