@@ -42,3 +42,5 @@
 - Cosmetic adjustments
 ### 4/21
 - Fixed API endpoints health documentation
+### 4/22
+- Implemented nodemailer

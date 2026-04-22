@@ -8,12 +8,15 @@ import { readFile } from 'fs/promises';  // For async file reading
 import { MongoClient, ServerApiVersion, ObjectId } from 'mongodb';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
+import nodemailer from 'nodemailer';
+// import { sendEmail } from './mail.js';
 
 const app = express();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const uri = process.env.MONGO_URI;
 const JWT_SECRET = process.env.JWT_SECRET;
+const subscribers = null;
 
 app.use(express.static(join(__dirname, '/public')));
 app.use(express.json());
@@ -39,6 +42,14 @@ async function connectToMongo() {
 }
 connectToMongo();
 const db = client.db('quiltmachine');
+
+const transporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: `${process.env.EMAIL}`, //change to match your gmail! 
+    pass: process.env.EMAIL_PASS
+  }
+});
 
 // middlewares aka endpoints aka 'get to slash' {http verb} to slash {you name ur endpoint}
 app.get('/', (req, res) => {
@@ -268,6 +279,29 @@ function parseISODate(ISODate) {
   return text;
 }
 
+async function sendEmail(pageId) {
+  let emailArray = [];
+  try {
+    emailArray = await db.collection('subscribers').find({}).toArray();
+  } catch (error) {
+    console.error('Error getting subscribers:', error);
+  }
+  for (const email of emailArray) {
+    console.log(email.email);
+    try {
+      await transporter.sendMail({
+        from: `"Space Station 76" <${process.env.EMAIL}>`,
+        to: email.email,
+        subject: 'New page posted!',
+        text: 'Read it here: https://spacestation76.barrycumbie.com/comic?page=' + pageId
+      });
+      console.log('Email sent successfully!');
+    } catch (error) {
+      console.error('Error sending email:', error);
+    }
+  }
+}
+
 //CREATE - Add new user
 app.post('/api/auth/register', async (req, res) => {
   try {
@@ -396,7 +430,7 @@ app.post('/api/comics', authenticateToken, async (req, res) => {
 
     const result = await db.collection('comics').insertOne(page);
     console.log(`✅ Comic published by ${req.user.username}: ${title}`);
-
+    sendEmail(page.index);
     res.status(201).json({
       message: 'Page created successfully',
       comicId: result.insertedId,
@@ -702,6 +736,75 @@ app.delete('/api/comments/:id', authenticateToken, async (req, res) => {
     });
   } catch (error) {
     res.status(500).json({ error: 'Failed to delete comment: ' + error.message });
+  }
+});
+
+//CREATE - Add new subscriber
+app.post('/api/subscribe', async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    // Simple validation
+    if (!email) {
+      return res.status(400).json({ error: 'Info required' });
+    }
+
+    const subscriber = {
+      email,
+      dateAdded: new Date()
+    }
+
+    const result = await db.collection('subscribers').insertOne(subscriber);
+    console.log(`✅ New subscriber: ${email}`);
+
+    res.status(201).json({
+      message: 'Subscribed successfully',
+      subscriberId: result.insertedId,
+      subscriber: { ...subscriber, _id: result.insertedId }
+    });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to subscribe: ' + error.message });
+  }
+
+});
+
+//READ - Get a single subscriber
+app.get('/api/subscribe/:email', async (req, res) => {
+  try {
+    const { email } = req.params;
+
+    const subscriberEmail = await db.collection('subscribers').findOne({ email: email });
+
+    res.json(subscriberEmail);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to fetch subscriber: ' + error.message });
+  }
+});
+
+// DELETE - Delete a subscriber
+app.delete('/api/subscribe/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // Validate ObjectId
+    if (!ObjectId.isValid(id)) {
+      return res.status(400).json({ error: 'Invalid ID' });
+    }
+
+    const result = await db.collection('subscribers').deleteOne({ _id: new ObjectId(id) });
+
+    if (result.deletedCount === 0) {
+      return res.status(404).json({ error: 'Subscriber found' });
+    }
+
+    console.log(`🗑️ Unsubscribed: ${id}`);
+
+    res.json({
+      message: 'Unsubscribed successfully',
+      deletedCount: result.deletedCount
+    });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to unsubscribe: ' + error.message });
   }
 });
 

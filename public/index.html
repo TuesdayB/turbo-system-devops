@@ -25,13 +25,23 @@
   <div class="container-sm">
     <p>Follow Kaalie the naiive, bubbly mermaid and Mae the prickly selkie security guard as they learn to get along on a dingy space station in the middle of nowhere!</p> <br>
     <button onclick="window.location.href='/comic'">Read it here!</button>
-    <div id="message"></div>
+  </div>
+  <div class="container-sm">
+    <form id="mailingListSignup">
+      <div class="form-group">
+        <label for="emailSubscribe">Subscribe to the mailing list to get notified when we update!</label>
+        <input type="text" id="emailSubscribe" required>
+      </div>
+      <div id="message"></div>
+      <button type="submit">Subscribe</button>
+    </form>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
     integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI"
     crossorigin="anonymous"></script>
   <script src="Scripts/script.js" type="application/javascript"></script>
+  <script src="Scripts/index.js" type="application/javascript"></script>
 </body>
 
 </html>

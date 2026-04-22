@@ -8,7 +8,7 @@ This project will is a website for displaying a webcomic, which includes:
 - [x] An admin panel for publishing comic pages and announcements 
 
 - [x] Users will be able to leave comments on each individual comic page. 
-- [] Users will also be able to add their email to a mailing list to get email notifications when a new comic page or announcement is posted.
+- [x] Users will also be able to add their email to a mailing list to get email notifications when a new comic page or announcement is posted.
 
 ### Target Users
 As a webcomic artist, I want a place to publish my comic and news about it so that other people can read it.
