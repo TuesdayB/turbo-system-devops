@@ -19,6 +19,7 @@ As a webcomic artist, I want a place to publish my comic and news about it so th
 - [Deployment](https://spacestation76.barrycumbie.com)
 - [Milestones](https://github.com/TuesdayB/turbo-system-devops/milestones)
 - [Selected Boxes/Pathways](https://github.com/TuesdayB/turbo-system-devops/issues/5)
+- [GH Pages](https://tuesdayb.github.io/turbo-system-devops/)
 
 ### Tech Stack
 - Code
@@ -38,3 +39,11 @@ As a webcomic artist, I want a place to publish my comic and news about it so th
 
  ### Problem-Solving
  - [MIME Type Mismatch Error](https://github.com/TuesdayB/turbo-system-devops/wiki/MIME-Type-Mismatch-Error)
+
+### Capability Boxes
+#### Box 1: [Client Engagement](https://github.com/TuesdayB/turbo-system-devops/issues/12)
+#### Box 2: [Authentication](https://github.com/TuesdayB/turbo-system-devops/issues/9)
+#### Box 3: [Core Feature System](https://github.com/TuesdayB/turbo-system-devops/issues/13)
+#### Box 4: [UI/UX Design](https://github.com/TuesdayB/turbo-system-devops/issues/14)
+#### Box 5: [???]()
+#### Box 6: [Documentation/Reflection]()
