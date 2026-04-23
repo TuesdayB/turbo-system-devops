@@ -237,6 +237,25 @@ app.get('/api/health', (req, res) => {
       method: 'DELETE',
       path: '/api/comments/:id',
       description: 'DELETE - Remove comment'
+    },
+        {
+      method: 'POST',
+      path: '/api/subscribe',
+      description: 'CREATE - New subscriber',
+      bodyExample: {
+        "email": "example@email.com",
+        "dateAdded": ISODate
+      }
+    },
+        {
+      method: 'GET',
+      path: '/api/subscribe',
+      description: 'READ - Get all subscribers'
+    },
+        {
+      method: 'GET',
+      path: '/api/subscribe/:email',
+      description: 'READ - Get a single subscriber'
     }
   ];
 
