@@ -45,5 +45,5 @@ As a webcomic artist, I want a place to publish my comic and news about it so th
 #### Box 2: [Authentication](https://github.com/TuesdayB/turbo-system-devops/issues/9)
 #### Box 3: [Core Feature System](https://github.com/TuesdayB/turbo-system-devops/issues/13)
 #### Box 4: [UI/UX Design](https://github.com/TuesdayB/turbo-system-devops/issues/14)
-#### Box 5: [???]()
+#### Box 5: [E-Mail System](https://github.com/TuesdayB/turbo-system-devops/issues/15)
 #### Box 6: [Documentation/Reflection]()
