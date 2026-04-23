@@ -9,14 +9,12 @@ import { MongoClient, ServerApiVersion, ObjectId } from 'mongodb';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import nodemailer from 'nodemailer';
-// import { sendEmail } from './mail.js';
 
 const app = express();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const uri = process.env.MONGO_URI;
 const JWT_SECRET = process.env.JWT_SECRET;
-const subscribers = null;
 
 app.use(express.static(join(__dirname, '/public')));
 app.use(express.json());
