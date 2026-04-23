@@ -50,6 +50,6 @@ As a webcomic artist, I want a place to publish my comic and news about it so th
 #### Box 6: [Documentation/Reflection](https://github.com/TuesdayB/turbo-system-devops/issues/19)
 
 ### Sprint 99
-#### [Features](https://github.com/TuesdayB/turbo-system-devops/issues/16)
-#### [Improvements](https://github.com/TuesdayB/turbo-system-devops/issues/17)
-#### [Known Bugs](https://github.com/TuesdayB/turbo-system-devops/issues/18)
+- [Features](https://github.com/TuesdayB/turbo-system-devops/issues/16)
+- [Improvements](https://github.com/TuesdayB/turbo-system-devops/issues/17)
+- [Known Bugs](https://github.com/TuesdayB/turbo-system-devops/issues/18)
