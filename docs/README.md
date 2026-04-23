@@ -36,8 +36,10 @@ As a webcomic artist, I want a place to publish my comic and news about it so th
     - Render
     - .yaml
     - GCP
-
- ### Problem-Solving
+### Value Proposition
+- Before: We had no idea where to publish and host our project, we wanted something extra customizable so we can add a unique personal touch to the reading experience.
+- Now: We have a website that we have full artistic control over with no dependency on other limiting hosting sites.
+### Problem-Solving
  - [MIME Type Mismatch Error](https://github.com/TuesdayB/turbo-system-devops/wiki/MIME-Type-Mismatch-Error)
  - [Array.map is Not a Function](https://github.com/TuesdayB/turbo-system-devops/wiki/Error:-array.map-is-not-a-Function)
 
