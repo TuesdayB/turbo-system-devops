@@ -44,12 +44,14 @@ As a webcomic artist, I want a place to publish my comic and news about it so th
  - [Array.map is Not a Function](https://github.com/TuesdayB/turbo-system-devops/wiki/Error:-array.map-is-not-a-Function)
 
 ### Capability Boxes
-#### Box 1: [Client Engagement](https://github.com/TuesdayB/turbo-system-devops/issues/12)
-#### Box 2: [Authentication](https://github.com/TuesdayB/turbo-system-devops/issues/9)
-#### Box 3: [Core Feature System](https://github.com/TuesdayB/turbo-system-devops/issues/13)
-#### Box 4: [UI/UX Design](https://github.com/TuesdayB/turbo-system-devops/issues/14)
-#### Box 5: [E-Mail System](https://github.com/TuesdayB/turbo-system-devops/issues/15)
-#### Box 6: [Documentation/Reflection](https://github.com/TuesdayB/turbo-system-devops/issues/19)
+| Box | What I Did | Evidence |                                                                          
+|---|---|---|
+| Box 1: Client Engagement | Discussed design decisions with my client & iterated the end product based on those discussions | [Client Engagement](https://github.com/TuesdayB/turbo-system-devops/issues/12) |
+| Box 2: Authentication | Implemented a user authentication system for content management | [Authentication](https://github.com/TuesdayB/turbo-system-devops/issues/9) |
+| Box 3: Core Feature System | Implemented several sets of CRUD operations for various aspects of the site's content | [Core Feature System](https://github.com/TuesdayB/turbo-system-devops/issues/13) |
+| Box 4: UI/UX Design | Designed a responsive nav bar that automtically replicates to each page | [UI/UX Design](https://github.com/TuesdayB/turbo-system-devops/issues/14) |
+| Box 5: E-Mail System | Implemented a subscribe/unsubscibe system so users can get e-mail notifications when a comic update is posted | [E-Mail System](https://github.com/TuesdayB/turbo-system-devops/issues/15) |
+| Box 6: Documentation/Reflection | You are here! | [Documentation/Reflection](https://github.com/TuesdayB/turbo-system-devops/issues/19) |
 
 ### Sprint 99
 - [Features](https://github.com/TuesdayB/turbo-system-devops/issues/16)
